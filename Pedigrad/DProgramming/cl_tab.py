@@ -145,9 +145,9 @@ class Table(object):
     with open(name_of_file,option) as the_file:
       for i in range(len(outputs)):
         n1 = ">"+str(i)+":"+str(self.seq1.name)+":"+str(self.seq1.color)+"\n"
-        s1 = usf.list_to_string(outputs[i][0])+"\n"
+        s1 = ''.join(outputs[i][0])+"\n"
         n2 = ">"+str(i)+":"+str(self.seq2.name)+":"+str(self.seq2.color)+"\n"
-        s2 = usf.list_to_string(outputs[i][1])+"\n"
+        s2 = ''.join(outputs[i][1])+"\n"
         the_file.write(n1)
         the_file.write(s1)
         the_file.write(n2)
