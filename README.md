@@ -1,8 +1,6 @@
 ## The present directory contains:
 
-1. a python file: Pedigrad.py (headers)
-2. a pdf file: documentation.pdf (the documentation for the library)
-3. a directory ```Pedigrad_py``` containing the modules: 
+1. a directory ```Pedigrad``` containing the modules: 
    * Useful;
    * DProgramming;
    * SegmentCategory;
@@ -10,7 +8,8 @@
    * PartitionCategory;
    * AsciiTree;
    * and Phylogeny.
-4. a directory ```User``` containing a tutorial
+2. a pdf file: documentation.pdf (the documentation for the library)
+3. a directory ```Tutorial``` containing a tutorial
 
 ## To use the functions and classes of the library, you can follow one of the following installation procedures:
 
