@@ -225,9 +225,10 @@ class PreOrder:
           keep_going = False
           for elt in self.relations[i]:
             for j in range(len(self.relations)):
-              if (j != i) and elt == self.relations[j][0]:
+              if j != i and elt == self.relations[j][0]:
                 for new_elt in self.relations[j]:
-                  keep_going = usf.add_to(new_elt,self.relations[i])
+                  keep_going = new_elt not in self.relations[i]
+                  usf.add_to(new_elt,self.relations[i])
 #------------------------------------------------------------------------------
   def _geq(self,element1,element2):
     self.closure()

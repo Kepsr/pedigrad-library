@@ -22,8 +22,6 @@
         [Inputs: 1]
           - element   [Type] 'a
           - a_list    [Type] list('a)
-        [Outputs: 2]
-          - return    [Type] bool
   usf.inclusions
         [Inputs: 1]
           - start   [Type] int
@@ -59,7 +57,8 @@
 #------------------------------------------------------------------------------
 class _Useful:
 #------------------------------------------------------------------------------
-  def read_until(self,a_file,separators,EOL_symbols,inclusive = False):
+  @staticmethod
+  def read_until(a_file,separators,EOL_symbols,inclusive = False):
     words = []
     read = a_file.read(1)
     while read not in EOL_symbols + ['']:
@@ -75,7 +74,8 @@ class _Useful:
       words.append(read)
     return words
 #------------------------------------------------------------------------------
-  def fasta(self,name_of_file):
+  @staticmethod
+  def fasta(name_of_file):
     names = []
     sequences = []
     with open(name_of_file,"r") as the_file:
@@ -90,11 +90,10 @@ class _Useful:
           flag_EOF = True
     return (names,sequences)
 #------------------------------------------------------------------------------
-  def add_to(self,element,a_list):
-      flag_presence = element in a_list
-      if not flag_presence:
+  @staticmethod
+  def add_to(element, a_list: list):
+      if element not in a_list:
         a_list.append(element)
-      return not flag_presence
 #------------------------------------------------------------------------------
   def inclusions(self,start,domain,holes):
       if holes == 0:
