@@ -120,12 +120,13 @@ separators = heading_separators + ['!']
 #Dependencies: current, Useful
 #------------------------------------------------------------------------------
 from Pedigrad.Useful.usf import usf
+from functools import reduce
 #------------------------------------------------------------------------------
 #CODE
 #------------------------------------------------------------------------------
 class PreOrder:
 #------------------------------------------------------------------------------
-  def __init__(self,name_of_file,cartesian = 0,*args):
+  def __init__(self, name_of_file, cartesian = 0, *args):
     if cartesian > 0 and len(args) == 1:
       self.relations = args[0].relations
       self.transitive = args[0].transitive
@@ -141,13 +142,13 @@ class PreOrder:
       self.mask = False
       self.cartesian = cartesian
 
-      with open(name_of_file,"r") as the_file:
+      with open(name_of_file, "r") as the_file:
 
         #Search the key words '!obj:' or 'obj:'
         list_of_objects = []
         flag_obj = False
-        while not(flag_obj):
-          heading = usf.read_until(the_file,heading_separators,[':'])
+        while not flag_obj:
+          heading = usf.read_until(the_file, heading_separators, [':'])
           if not heading:
             print("Error in PreOrder.__init__: in \'"+\
             name_of_file+"\': \'obj:\' was not found")
@@ -160,22 +161,22 @@ class PreOrder:
 
         #Search the key word 'rel:'
         flag_rel = False
-        while not(flag_rel):
-          line = usf.read_until(the_file,separators,['#',':'],inclusive=True)
+        while not flag_rel:
+          line = usf.read_until(the_file, separators, ['#',':'], inclusive=True)
           objects = []
-          if len(line) > 1 and line[len(line)-2:len(line)] == ["rel",":"]:
-            objects = line[:len(line)-2]
-            flag_rel = True
-          elif line == ['']:
+          if line == ['']:
             break
+          if len(line) > 1 and line[-2:] == ["rel", ":"]:
+            objects = line[:-2]
+            flag_rel = True
           else:
-            objects = line[:len(line)-1]
-            usf.read_until(the_file,separators,['\n'])
+            objects = line[:-1]
+            usf.read_until(the_file, separators, ['\n'])
 
           #Construct [list_of_objects] and [self.relations]
-          for i in range(len(objects)):
-              usf.add_to(objects[i],list_of_objects)
-              usf.add_to([objects[i]],self.relations)
+          for obj in objects:
+              usf.add_to(obj, list_of_objects)
+              usf.add_to([obj], self.relations)
 
         #If the key word 'rel:' is not found
         if flag_rel == False:
@@ -183,122 +184,104 @@ class PreOrder:
 
         #If the key word 'rel:' was found, search the symbols '>' and ';'
         flag_EOF = False
-        while not(flag_EOF):
+        while not flag_EOF:
 
           all_successors = []
           flag_succ = False
-          while not(flag_succ):
-            line = usf.read_until(the_file,separators,['#','>'],inclusive=True)
+          while not flag_succ:
+            line = usf.read_until(the_file, separators, ['#', '>'], inclusive=True)
             successors = []
-            if line[len(line)-1] == ">":
-              successors = line[:len(line)-1]
-              flag_succ = True
-            elif line == ['']:
+            if line == ['']:
               break
+            if line[-1] == ">":
+              successors = line[:-1]
+              flag_succ = True
             else:
-              successors = line[:len(line)-1]
-              usf.read_until(the_file,separators,['\n'])
+              successors = line[:-1]
+              usf.read_until(the_file, separators, ['\n'])
 
           #Construct [all_successors]
-          for i in range(len(successors)):
-              usf.add_to(successors[i],all_successors)
+          for successor in successors:
+              usf.add_to(successor, all_successors)
 
           #Complete [self.relations] with [predecessors] for each successor
-          predecessors = usf.read_until(the_file,separators,[';'])
-          if all_successors == [] or predecessors == []:
+          predecessors = usf.read_until(the_file, separators, [';'])
+          if not all_successors or not predecessors:
             flag_EOF = True
-          for i in range(len(all_successors)):
+          for successor in all_successors:
             try:
-              index = list_of_objects.index(all_successors[i])
-              for j in range(len(predecessors)):
-                usf.add_to(predecessors[j],self.relations[index])
+              index = list_of_objects.index(successor)
+              for predecessor in predecessors:
+                usf.add_to(predecessor, self.relations[index])
             except:
               print("Warning in PreOrder.__init__: in \'"+\
-              name_of_file+"\': "+ all_successors[i]+" is not an object")
+              name_of_file+"\': "+ successor+" is not an object")
 #------------------------------------------------------------------------------
   def closure(self):
-    if self.transitive == False:
+    if not self.transitive:
       self.transitive = True
-      for i in range(len(self.relations)):
+      for i, item in enumerate(self.relations):
         keep_going = True
         while keep_going:
           keep_going = False
-          for elt in self.relations[i]:
-            for j in range(len(self.relations)):
-              if j != i and elt == self.relations[j][0]:
-                for new_elt in self.relations[j]:
-                  keep_going = new_elt not in self.relations[i]
-                  usf.add_to(new_elt,self.relations[i])
+          for elt in item:
+            for j, jtem in enumerate(self.relations):
+              if i != j and elt == jtem[0]:
+                for new_elt in jtem:
+                  keep_going = new_elt not in item
+                  usf.add_to(new_elt, item)
 #------------------------------------------------------------------------------
-  def _geq(self,element1,element2):
+  def _geq(self, element1, element2):
     self.closure()
-    flag = False
-    index = 0
-    for i in range(len(self.relations)):
-      if self.relations[i][0] == element1:
-        flag = True
-        index = i
-        break
-    return flag and (element2 in self.relations[index])
+    for relation in self.relations:
+      if relation[0] == element1:
+        return True and (element2 in relation)
+    return False and (element2 in self.relations[0])
 #------------------------------------------------------------------------------
   def geq(self,element1,element2):
     if self.cartesian == 0:
-      return self._geq(element1,element2)
-    else:
-      for i in range(self.cartesian):
-        if element2[i] != True and not(self._geq(element1[i],element2[i])):
-          return False
-      return True
+      return self._geq(element1, element2)
+
+    for i in range(self.cartesian):
+      if not element2[i] and not self._geq(element1[i], element2[i]):
+        return False
+    return True
 #------------------------------------------------------------------------------
   def _inf(self,element1,element2):
     self.closure()
-    flag1 = False
-    index1 = 0
-    flag2 = False
-    index2 = 0
-    for i in range(len(self.relations)):
-      if self.relations[i][0] == element1:
-        flag1 = True
-        index1 = i
-      if self.relations[i][0] == element2:
-        flag2 = True
-        index2 = i
-      if flag1 and flag2:
+    relation1 = self.relations[0]
+    relation2 = self.relations[0]
+    found_relation1 = False
+    found_relation2 = False
+    # In a single pass, 
+    # find the first instance of element1
+    # and the first instance of element2
+    for relation in self.relations:
+      if relation[0] == element1:
+        found_relation1 = True
+        relation1 = relation
+      if relation[0] == element2:
+        found_relation2 = True
+        relation2 = relation
+      if found_relation1 and found_relation2:
         break
-    if not(flag1 and flag2):
+    if not (found_relation1 and found_relation2):
       return self.mask
-    else:
-      copy1 = self.relations[index1][:]
-      copy2 = self.relations[index2][:]
-      intersect = []
-      for i in range(len(copy1)):
-        for j in range(len(copy2)):
-          if copy1[i] == copy2[j]:
-            intersect.append(copy1[i])
-            break
-      if intersect != []:
-        sup = intersect[0]
-        for i in range(1,len(intersect)):
-          if self.geq(intersect[i],sup):
-            sup = intersect[i]
-        return sup
-      else:
-        return self.mask
+    intersect = set(relation1) & set(relation2)
+    if not intersect:
+      return self.mask
+
+    return reduce(lambda x, y: x if self.geq(x, y) else y, intersect)
 #------------------------------------------------------------------------------
-  def inf(self,element1,element2):
+  def inf(self, element1, element2):
     if self.cartesian == 0:
-      return self._inf(element1,element2)
-    else:
-      infimum = []
-      for i in range(self.cartesian):
-        infimum.append(self._inf(element1[i],element2[i]))
-      return infimum
+      return self._inf(element1, element2)
+
+    return [
+      self._inf(element1[i], element2[i])
+      for i in range(self.cartesian)
+    ]
 #------------------------------------------------------------------------------
-  def presence(self,element):
-      presence = False
-      for j in range(len(self.relations)):
-        if element == self.relations[j][0]:
-          presence = True
-          break
-      return presence
+  def presence(self, element):
+    return any(element == relation[0] for relation in self.relations)
 #------------------------------------------------------------------------------

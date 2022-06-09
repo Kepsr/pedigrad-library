@@ -22,13 +22,6 @@
         [Inputs: 1]
           - element   [Type] 'a
           - a_list    [Type] list('a)
-  usf.inclusions
-        [Inputs: 1]
-          - start   [Type] int
-          - domain  [Type] int
-          - holes   [Type] int
-        [Outputs: 2]
-          - return  [Type] list(list(int))
 
 [General description]
   This structure is equipped with a collection of functions that turned out to be very useful while coding the present library.
@@ -48,9 +41,6 @@
   [Description]
     This function appends an element to a list if this element is not present in the list. Otherwise, the element is not appended.
 
->>> Function: usf.inclusions
-  [Description]
-    This function computes the list of lists f whose implicit mappings i -> f[i] represent increasing inclusions from the ordered set {0,1,...,domain-holes-1} to the ordered set {start,start+1,...,start+domain-1}
 '''
 #------------------------------------------------------------------------------
 #CODE
@@ -58,7 +48,7 @@
 class _Useful:
 #------------------------------------------------------------------------------
   @staticmethod
-  def read_until(a_file,separators,EOL_symbols,inclusive = False):
+  def read_until(a_file, separators, EOL_symbols, inclusive = False):
     words = []
     read = a_file.read(1)
     while read not in EOL_symbols + ['']:
@@ -78,35 +68,22 @@ class _Useful:
   def fasta(name_of_file):
     names = []
     sequences = []
-    with open(name_of_file,"r") as the_file:
+    with open(name_of_file, "r") as the_file:
       flag_EOF = False
-      usf.read_until(the_file,[],['>'])
+      usf.read_until(the_file, [], ['>'])
       while not flag_EOF:
-        name = usf.read_until(the_file,[':'],['\n','\r'])
+        name = usf.read_until(the_file, [':'], ['\n','\r'])
         if name:
           names.append(name)
-          sequences.append(''.join(usf.read_until(the_file,['\n','\r'],['>'])))
+          sequences.append(''.join(usf.read_until(the_file, ['\n', '\r'], ['>'])))
         else:
           flag_EOF = True
-    return (names,sequences)
+    return (names, sequences)
 #------------------------------------------------------------------------------
   @staticmethod
   def add_to(element, a_list: list):
       if element not in a_list:
         a_list.append(element)
-#------------------------------------------------------------------------------
-  def inclusions(self,start,domain,holes):
-      if holes == 0:
-        return [[start + i for i in range(domain)]]
-
-      if holes > domain:
-        return []
-
-      return [
-        x + i
-        for i in self.inclusions(start + 1, domain - 1, holes)
-        for x in self.inclusions(start, 1, 0)
-      ] + self.inclusions(start + 1, domain - 1, holes - 1)
 #------------------------------------------------------------------------------
 #  def trim(self,string,character,option = "suffix"):
 #    def rev(i,option):

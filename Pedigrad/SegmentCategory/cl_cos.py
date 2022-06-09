@@ -2,10 +2,10 @@
 #CategoryOfSegments (Class) | 1 object | 4 methods
 #------------------------------------------------------------------------------
 '''
-[Objects] 
+[Objects]
   .preorder [Type] PreOrder
 
-[Methods] 
+[Methods]
   .__init__
         [Inputs: 1]
           - preorder [Type] PreOrder
@@ -28,32 +28,32 @@
           - target  [Type] SegmentObject
         [Outputs: 1]
           - homset  [Type] list(MorphismOfSegments)
-                
-[General description] 
-  This structure models the features of a category of segments. The class is initialized by passing a PreOrder item to its constructor and allows one to know or compute information related to a category structure. The method [identity] returns a Boolean value that specificies whether there may exist an identity morphism between two SegmentObject items (these may be saved in different places in the memory); the method [initial] returns an local initial object in the category, where the local aspect is determined by the colors of the segment; the method [homset] computes the hom-set of a pair of SegmentObject items. 
-    
+
+[General description]
+  This structure models the features of a category of segments. The class is initialized by passing a PreOrder item to its constructor and allows one to know or compute information related to a category structure. The method [identity] returns a Boolean value that specificies whether there may exist an identity morphism between two SegmentObject items (these may be saved in different places in the memory); the method [initial] returns an local initial object in the category, where the local aspect is determined by the colors of the segment; the method [homset] computes the hom-set of a pair of SegmentObject items.
+
 >>> Method: .__init__
-  [Actions] 
+  [Actions]
     .preorder  <- use(preorder)
-  [Description] 
+  [Description]
     This is the constructor of the class.
 
 >>> Method: .identity
-  [Actions] 
+  [Actions]
     return    <- use(segment1,segment2)
-  [Description] 
+  [Description]
     Specifies whether there is an identity morphisms from [segment1] to [segment2].
-    
+
 >>> Method: .initial
-  [Actions] 
+  [Actions]
     return    <- use(SegmentObject,domain,topology,colors)
-  [Description] 
+  [Description]
     Returns a local initial object with a uniform color equal to [color].
 
 >>> Method: .homset
-  [Actions] 
+  [Actions]
     homset    <- use(.preorder,source,target)
-  [Description] 
+  [Description]
     Returns the hom-set associated with the pair of objects ([source],[target]).
 '''
 #------------------------------------------------------------------------------
@@ -63,34 +63,61 @@ from .cl_pro import PreOrder
 from .cl_so import SegmentObject
 from .cl_mos import MorphismOfSegments
 
-from Pedigrad.Useful.usf import usf
 #------------------------------------------------------------------------------
 #CODE
 #------------------------------------------------------------------------------
-class CategoryOfSegments(object): 
-#------------------------------------------------------------------------------  
-  def __init__(self,preorder):
+def inclusions(start: int, domain: int, holes: int) -> list[list[int]]:
+  '''
+  inclusions
+        [Inputs: 1]
+          - start   [Type] int
+          - domain  [Type] int
+          - holes   [Type] int
+        [Outputs: 2]
+          - return  [Type] list(list(int))
+
+  >>> Function: usf.inclusions
+  [Description]
+    This function computes the list of lists f whose implicit mappings i -> f[i] represent increasing inclusions from the ordered set {0,1,...,domain-holes-1} to the ordered set {start,start+1,...,start+domain-1}
+  '''
+  if holes == 0:
+    return [[start + i for i in range(domain)]]
+
+  if holes > domain:
+    return []
+
+  return [
+    x + i
+    for i in inclusions(start + 1, domain - 1, holes)
+    for x in inclusions(start, 1, 0)
+  ] + inclusions(start + 1, domain - 1, holes - 1)
+
+
+class CategoryOfSegments:
+#------------------------------------------------------------------------------
+  def __init__(self, preorder):
     self.preorder = preorder
 #------------------------------------------------------------------------------
-  def identity(self,segment1,segment2):
-    return (segment1.domain == segment2.domain) \
-    and    (segment1.topology == segment2.topology) \
-    and    (segment1.colors == segment2.colors)
-#------------------------------------------------------------------------------    
-  def initial(self,domain,color):
-    topology = list()
-    colors = list()
-    for i in range(domain):
-      topology = topology + [(i,i)]
-      colors = colors + [color]
-    return SegmentObject(domain,topology,colors)
+  @staticmethod
+  def identity(segment1, segment2):
+    return segment1.domain   == segment2.domain \
+    and    segment1.topology == segment2.topology \
+    and    segment1.colors   == segment2.colors
 #------------------------------------------------------------------------------
-  def homset(self,source,target):
-    homset = list()
-    if target.domain-source.domain >= 0:
-      for i in usf.inclusions(0,target.domain,target.domain-source.domain):
-        arrow = MorphismOfSegments(source,target,i,self.preorder.geq)
-        if arrow.defined:
-          homset.append(arrow)
-    return homset
+  @staticmethod
+  def initial(domain, color):
+    return SegmentObject(
+      domain,
+      topology=[(i, i) for i in range(domain)],
+      colors=[color] * domain
+    )
+#------------------------------------------------------------------------------
+  def homset(self, source, target):
+    if target.domain - source.domain < 0:
+      return []
+
+    return [arrow for arrow in [
+        MorphismOfSegments(source, target, i, self.preorder.geq)
+        for i in inclusions(0, target.domain, target.domain - source.domain)
+    ] if arrow.defined]
 #------------------------------------------------------------------------------
