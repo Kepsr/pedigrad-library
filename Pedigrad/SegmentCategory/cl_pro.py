@@ -188,7 +188,6 @@ class PreOrder:
       flag_EOF = False
       while not flag_EOF:
 
-        all_successors = []
         flag_succ = False
         while not flag_succ:
           line = usf.read_until(the_file, separators, ['#', '>'], inclusive=True)
@@ -202,15 +201,11 @@ class PreOrder:
             successors = line[:-1]
             usf.read_until(the_file, separators, ['\n'])
 
-        #Construct [all_successors]
-        for successor in successors:
-            add_to(successor, all_successors)
-
         #Complete [self.relations] with [predecessors] for each successor
         predecessors = usf.read_until(the_file, separators, [';'])
-        if not all_successors or not predecessors:
+        if not successors or not predecessors:
           flag_EOF = True
-        for successor in all_successors:
+        for successor in set(successors):
           try:
             index = list_of_objects.index(successor)
             for predecessor in predecessors:
