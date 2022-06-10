@@ -31,10 +31,9 @@
 #------------------------------------------------------------------------------
 #CODE
 #------------------------------------------------------------------------------
-class CategoryItem(object):
-  def __init__(self,level,*args):
+class CategoryItem:
+  def __init__(self, level, *args):
     self.level = level
-    if len(args) == 2 and args[0].level == level-1 and args[1].level == level-1:
-      self.source = args[0]
-      self.target = args[1]
+    if len(args) == 2 and all(arg.level == level - 1 for arg in args):
+      self.source, self.target = args
 #------------------------------------------------------------------------------

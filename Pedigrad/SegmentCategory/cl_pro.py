@@ -238,7 +238,7 @@ class PreOrder:
         return True and (element2 in relation)
     return False and (element2 in self.relations[0])
 #------------------------------------------------------------------------------
-  def geq(self,element1,element2):
+  def geq(self,element1, element2):
     if self.cartesian == 0:
       return self._geq(element1, element2)
 
@@ -265,7 +265,7 @@ class PreOrder:
         relation2 = relation
       if found_relation1 and found_relation2:
         break
-    if not (found_relation1 and found_relation2):
+    else:
       return self.mask
     intersect = set(relation1) & set(relation2)
     if not intersect:

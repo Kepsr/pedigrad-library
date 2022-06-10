@@ -50,13 +50,14 @@ class _Useful:
   @staticmethod
   def read_until(a_file, separators, EOL_symbols, inclusive = False):
     words = []
+    blanks = EOL_symbols + ['']
     read = a_file.read(1)
-    while read not in EOL_symbols + ['']:
-      while read in separators and read not in EOL_symbols + ['']:
+    while read not in blanks:
+      while read in separators and read not in blanks:
         read = a_file.read(1)
-      if read not in EOL_symbols + ['']:
+      if read not in blanks:
         word = ''
-        while read not in separators and read not in EOL_symbols + ['']:
+        while read not in separators and read not in blanks:
           word += read
           read = a_file.read(1)
         words.append(word)
