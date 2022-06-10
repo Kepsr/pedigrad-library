@@ -46,7 +46,7 @@
 #------------------------------------------------------------------------------
 #Dependencies: sys, Useful
 #------------------------------------------------------------------------------
-from Pedigrad.Useful.usf import usf
+from Pedigrad.Useful.usf import add_to
 from Pedigrad.Useful.cat import CategoryItem
 #------------------------------------------------------------------------------
 #CODE
@@ -112,7 +112,7 @@ class MorphismOfSegments(CategoryItem):
         else:
           image_x = [y]
           while i < len(sorted_map) and sorted_map[i][0] == x:
-            usf.add_to(sorted_map[i][1],image_x)
+            add_to(sorted_map[i][1],image_x)
             i += 1
           #Check the uniqueness of y = f(x)
           if len(image_x) > 1:

@@ -60,7 +60,7 @@ from .cl_sal import SequenceAlignment
 
 from Pedigrad.SegmentCategory.cl_so import SegmentObject
 
-from Pedigrad.Useful.usf import usf
+from Pedigrad.Useful.usf import usf, add_to
 #------------------------------------------------------------------------------
 #CODE
 #------------------------------------------------------------------------------
@@ -90,8 +90,8 @@ class Environment:
     indiv = list()
     names,sequences = usf.fasta(name_of_file)
     for i in range(len(names)):
-      usf.add_to(names[i][0],group_labels)
-      usf.add_to(names[i][1],indiv)
+      add_to(names[i][0],group_labels)
+      add_to(names[i][1],indiv)
     if len(indiv) > len(self.b):
       print("Error in Environment.seqali: "+name_of_file+" contains more individuals than the number specified in the environment.")
       exit()
@@ -112,14 +112,14 @@ class Environment:
         if self.Seg.preorder.geq(names[i][2],self.b[ind]) or self.b[ind] == True:
           group_colors[gl][ind] = names[i][2]
           alignments[gl][ind] = sequences[i]
-          usf.add_to(len(alignments[gl][ind]),check_lengths[gl])
+          add_to(len(alignments[gl][ind]),check_lengths[gl])
       record = list()
       indexing = list()
       for i in range(len(group_labels)):
         if len(check_lengths[i]) == 1:
           schema = [check_lengths[i][0],group_colors[i]]
           indexing.append([schema,True])
-          usf.add_to(schema,record)
+          add_to(schema,record)
         else:
           indexing.append([[],False])
       base = list()

@@ -18,10 +18,6 @@
         [Outputs: 2]
           - names     [Type] list(list(string))
           - sequences [Type] list(string)
-  usf.add_to
-        [Inputs: 1]
-          - element   [Type] 'a
-          - a_list    [Type] list('a)
 
 [General description]
   This structure is equipped with a collection of functions that turned out to be very useful while coding the present library.
@@ -36,10 +32,6 @@
       - [names], containing the list of sequence labels specified in the file;
       - [sequences], containing the list of sequences.
   Furthermore, every sequence label is parsed such that every words separated by a colon is given as a distinct element within a list representing the sequence label.
-
->>> Function: usf.add_to
-  [Description]
-    This function appends an element to a list if this element is not present in the list. Otherwise, the element is not appended.
 
 '''
 #------------------------------------------------------------------------------
@@ -69,22 +61,17 @@ class _Useful:
   def fasta(name_of_file):
     names = []
     sequences = []
-    with open(name_of_file, "r") as the_file:
+    with open(name_of_file, 'r') as file:
       flag_EOF = False
-      usf.read_until(the_file, [], ['>'])
+      usf.read_until(file, [], ['>'])
       while not flag_EOF:
-        name = usf.read_until(the_file, [':'], ['\n','\r'])
+        name = usf.read_until(file, [':'], ['\n','\r'])
         if name:
           names.append(name)
-          sequences.append(''.join(usf.read_until(the_file, ['\n', '\r'], ['>'])))
+          sequences.append(''.join(usf.read_until(file, ['\n', '\r'], ['>'])))
         else:
           flag_EOF = True
     return (names, sequences)
-#------------------------------------------------------------------------------
-  @staticmethod
-  def add_to(element, a_list: list):
-      if element not in a_list:
-        a_list.append(element)
 #------------------------------------------------------------------------------
 #  def trim(self,string,character,option = "suffix"):
 #    def rev(i,option):
@@ -100,4 +87,11 @@ class _Useful:
 #    return a_list[0:an_index]+a_list[an_index+1:len(a_list)]
 #------------------------------------------------------------------------------
 usf = _Useful()
-#------------------------------------------------------------------------------
+
+def add_to(element, a_list: list):
+  '''
+  If `element` is not present in `a_list`, append the element to the list.
+  Otherwise, do nothing.
+  '''
+  if element not in a_list:
+    a_list.append(element)

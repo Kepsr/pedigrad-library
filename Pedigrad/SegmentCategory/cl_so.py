@@ -92,34 +92,25 @@
   from the segment.
 '''
 #------------------------------------------------------------------------------
-#Dependencies: sys
-#------------------------------------------------------------------------------
-import sys
-
-from Pedigrad.Useful.cat import CategoryItem
-#------------------------------------------------------------------------------
 #CODE
 #------------------------------------------------------------------------------
-class SegmentObject(CategoryItem):
+class SegmentObject:
 #------------------------------------------------------------------------------
   def __init__(self, domain, topology: list, colors: list):
-    super(SegmentObject, self).__init__(0)
-    if len(colors) != len(topology):
-      print("Error: in SegmentObject.__init__: lengths do not match.")
-      exit()
-
+    assert len(colors) == len(topology), "lengths do not match"
+    self.level = 0
     self.domain = domain
     self.topology = topology
     self.colors = colors
     self.parse = 0
 #------------------------------------------------------------------------------
   def _start(self):
-    if 0 > self.parse or self.parse >= len(self.topology):
+    if not (0 <= self.parse < len(self.topology)):
       self.parse = 0
 #------------------------------------------------------------------------------
   def patch(self, position, search = ">1"):
     self._start()
-    if 0 > position or position >= self.domain:
+    if not (0 <= position < self.domain):
       return -1
     while 0 <= self.parse < len(self.topology):
       if position < self.topology[self.parse][0]:
@@ -134,51 +125,52 @@ class SegmentObject(CategoryItem):
     return -1
 #------------------------------------------------------------------------------
   def display(self):
-    sys.stdout.write(''.join(self.strings()) + '\n')
+    print(''.join(self.strings()))
 
   def strings(self):
-    yield '('
+    if not self.topology:
+      yield '()'
+      return
 
-    if self.topology:
-      #How to display segments with a long masked start patch
-      i = self.topology[0][0]
-      if i < self.domain: #Should happen
-        yield 'o-' + str(i - 1) + '-o' if i > 10 else \
-              'o' * i
-      else: #Special case where the whole segment is masked
-        yield 'o-' + str(self.domain - 2) + '-o' if self.domain > 11 else \
-              'o' * self.domain  #Bottleneck case w/t the normal case
-      if 0 < i < self.domain:
+    yield '('
+    #How to display segments with a long masked start patch
+    i = self.topology[0][0]
+    if i < self.domain: #Should happen
+      yield 'o-' + str(i - 1) + '-o' if i > 10 else \
+            'o' * i
+    else: #Special case where the whole segment is masked
+      yield 'o-' + str(self.domain - 2) + '-o' if self.domain > 11 else \
+            'o' * self.domain  #Bottleneck case w/t the normal case
+    if 0 < i < self.domain:
+      yield '|'
+
+    #Display the inside of the segment
+    self._start()
+    saved_parse = self.parse
+    prec_value = -1
+    self.parse = 0
+    while i <= min(self.domain - 1, self.topology[-1][1]):
+      value = self.patch(i)
+      if i == self.topology[0][0]:
+        prec_value = value
+      elif prec_value != value:
+        prec_value = value
         yield '|'
 
-      #Display the inside of the segment
-      self._start()
-      saved_parse = self.parse
-      prec_value = -1
-      self.parse = 0
-      while i <= min(self.domain - 1, self.topology[-1][1]):
-        value = self.patch(i)
-        if i == self.topology[0][0]:
-          prec_value = value
-        elif prec_value != value:
-          prec_value = value
-          yield '|'
-
-        if value == -1:
-          yield 'o'
-        else:
-          yield '\033[91m\033[1mo\033[0m' if self.parse == saved_parse else \
-                '\033[1mo\033[0m'
-        i += 1
-
-      #How to display segments with a long masked end patch
-      if self.domain - self.topology[-1][1] - 1 > 11:
-        yield '|o-' + str(self.domain - self.topology[-1][1] - 3) + '-o'
+      if value == -1:
+        yield 'o'
       else:
-        yield '|' + 'o' * (self.domain - self.topology[-1][1] - 1)
+        yield '\033[91m\033[1mo\033[0m' if self.parse == saved_parse else \
+              '\033[1mo\033[0m'
+      i += 1
 
-      #In any cases
-      self.parse = saved_parse
+    #How to display segments with a long masked end patch
+    if self.domain - self.topology[-1][1] - 1 > 11:
+      yield '|o-' + str(self.domain - self.topology[-1][1] - 3) + '-o'
+    else:
+      yield '|' + 'o' * (self.domain - self.topology[-1][1] - 1)
+
+    self.parse = saved_parse
     yield ')'
 #------------------------------------------------------------------------------
   def merge(self, folding_format, infimum):
@@ -189,8 +181,8 @@ class SegmentObject(CategoryItem):
     for step, f in enumerate(folding_format):
       start, modulo, end = f
       initial = max(start, initial)
-      new_topology += self.topology[final:initial]
-      new_colors += self.colors[final:initial]
+      new_topology.extend(self.topology[final:initial])
+      new_colors.extend(self.colors[final:initial])
       if initial >= len(self.topology):
         break
       final = min(max(initial, end + 1), len(self.topology))
@@ -216,8 +208,8 @@ class SegmentObject(CategoryItem):
           #Repeat the same process if the tiling continues
           saved_color = ''
       if step == len(folding_format) - 1:
-        new_topology += self.topology[final:]
-        new_colors += self.colors[final:]
+        new_topology.extend(self.topology[final:])
+        new_colors.extend(self.colors[final:])
       initial = final
 
     return SegmentObject(self.domain, new_topology, new_colors)

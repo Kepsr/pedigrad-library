@@ -119,7 +119,7 @@ separators = heading_separators + ['!']
 #------------------------------------------------------------------------------
 #Dependencies: current, Useful
 #------------------------------------------------------------------------------
-from Pedigrad.Useful.usf import usf
+from Pedigrad.Useful.usf import usf, add_to
 from functools import reduce
 #------------------------------------------------------------------------------
 #CODE
@@ -175,8 +175,8 @@ class PreOrder:
 
           #Construct [list_of_objects] and [self.relations]
           for obj in objects:
-              usf.add_to(obj, list_of_objects)
-              usf.add_to([obj], self.relations)
+              add_to(obj, list_of_objects)
+              add_to([obj], self.relations)
 
         #If the key word 'rel:' is not found
         if flag_rel == False:
@@ -202,7 +202,7 @@ class PreOrder:
 
           #Construct [all_successors]
           for successor in successors:
-              usf.add_to(successor, all_successors)
+              add_to(successor, all_successors)
 
           #Complete [self.relations] with [predecessors] for each successor
           predecessors = usf.read_until(the_file, separators, [';'])
@@ -212,7 +212,7 @@ class PreOrder:
             try:
               index = list_of_objects.index(successor)
               for predecessor in predecessors:
-                usf.add_to(predecessor, self.relations[index])
+                add_to(predecessor, self.relations[index])
             except:
               print("Warning in PreOrder.__init__: in \'"+\
               name_of_file+"\': "+ successor+" is not an object")
@@ -229,7 +229,7 @@ class PreOrder:
               if i != j and elt == jtem[0]:
                 for new_elt in jtem:
                   keep_going = new_elt not in item
-                  usf.add_to(new_elt, item)
+                  add_to(new_elt, item)
 #------------------------------------------------------------------------------
   def _geq(self, element1, element2):
     self.closure()
