@@ -72,30 +72,26 @@ from Pedigrad.SegmentCategory.cl_cos import CategoryOfSegments
 #------------------------------------------------------------------------------
 #CODE
 #------------------------------------------------------------------------------
-class SequenceAlignment(object): 
+class SequenceAlignment: 
 #------------------------------------------------------------------------------  
-  def __init__(self,env,indiv,base,database):
+  def __init__(self, env, indiv, base: list, database: list):
     self.env = env
-    preorder = PreOrder('cartesian',self.env.spec,self.env.Seg.preorder)
+    preorder = self.env.Seg.preorder.copy(cartesian=self.env.spec)
     self.Seg = CategoryOfSegments(preorder)
     self.indiv = indiv
     self.base = base
     self.database = database
 #------------------------------------------------------------------------------  
   def eval(self,segment):
-    for i in range(len(self.base)):
-      if self.Seg.identity(segment,self.base[i]):
+    for i, item in enumerate(self.base):
+      if self.Seg.identity(segment, item):
         return self.database[i]
-        break
-    return list()
+    return []
 #------------------------------------------------------------------------------     
   def extending_category(self,segment):
-    outputs = list()
-    for i in range(len(self.base)):
-      for m in self.Seg.homset(segment,self.base[i]):
-        outputs.append((i,m))  
-    return outputs
-#------------------------------------------------------------------------------   
-  def ran(self,cat_item):
-    {}
+    return [
+      (i, m)
+      for i, item in enumerate(self.base)
+      for m in self.Seg.homset(segment, item)
+    ]
 #------------------------------------------------------------------------------

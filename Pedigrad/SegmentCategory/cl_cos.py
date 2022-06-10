@@ -95,7 +95,7 @@ def inclusions(start: int, domain: int, holes: int) -> list[list[int]]:
 
 class CategoryOfSegments:
 #------------------------------------------------------------------------------
-  def __init__(self, preorder):
+  def __init__(self, preorder: PreOrder):
     self.preorder = preorder
 #------------------------------------------------------------------------------
   @staticmethod

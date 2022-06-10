@@ -11,7 +11,7 @@
 [Methods]
   .__init__
         [Inputs: 2+]
-          - name_of_file  [Type] char
+          - filename  [Type] char
           - cartesian     [Type] int
           - *args         [Type] list
         [Outputs: 0]
@@ -49,13 +49,13 @@
           - presence  [Type] bool
 
 [General description]
-  This class models the features of a pre-ordered set. The pre-order relations are specified through either a file [name_of_file] or another PreOrder item passed to the constructor [__init__]. The method [closure] computes the transitive closure of the pre-order relations stored in the object [relations]; the method [geq] returns a Boolean value specifying whether there is a pre-order relation between two given elements of the pre-ordered set; the method [inf] returns the infimum of two elements of the pre-ordered set; and the method [presence] returns a Boolean value specifying whether an element belongs to the pre-ordered set.
+  This class models the features of a pre-ordered set. The pre-order relations are specified through either a file [filename] or another PreOrder item passed to the constructor [__init__]. The method [closure] computes the transitive closure of the pre-order relations stored in the object [relations]; the method [geq] returns a Boolean value specifying whether there is a pre-order relation between two given elements of the pre-ordered set; the method [inf] returns the infimum of two elements of the pre-ordered set; and the method [presence] returns a Boolean value specifying whether an element belongs to the pre-ordered set.
 
 >>> Method: .__init__
   [Actions]
-    .relations  <- use(name_of_file,*args)
+    .relations  <- use(filename,*args)
     .transitive <- use(*args)
-    .mask       <- use(name_of_file,*args)
+    .mask       <- use(filename,*args)
     .cartesian  <- use(cartesian)
   [Description]
     This method is the constructor of the class.
@@ -126,96 +126,100 @@ from functools import reduce
 #------------------------------------------------------------------------------
 class PreOrder:
 #------------------------------------------------------------------------------
-  def __init__(self, name_of_file, cartesian = 0, *args):
-    if cartesian > 0 and len(args) == 1:
-      self.relations = args[0].relations
-      self.transitive = args[0].transitive
-      self.mask = args[0].mask
-      self.cartesian = cartesian
-    else:
-      if not name_of_file:
-        print("Error in PreOrder.__init__: name of file is empty")
-        exit()
+  def __init__(self, relations: list, transitive: bool, mask: bool, cartesian):
+    self.relations = relations
+    self.transitive = transitive
+    self.mask = mask
+    self.cartesian = cartesian
 
-      self.relations = []
-      self.transitive = False
-      self.mask = False
-      self.cartesian = cartesian
+  def copy(self, cartesian):
+    assert cartesian > 0
+    return PreOrder(self.relations, self.transitive, self.mask, cartesian)
 
-      with open(name_of_file, "r") as the_file:
+  @staticmethod
+  def from_file(filename: str, cartesian = 0):
+      # if not filename:
+      #   print("Error in PreOrder.__init__: name of file is empty")
+      #   exit()
 
-        #Search the key words '!obj:' or 'obj:'
-        list_of_objects = []
-        flag_obj = False
-        while not flag_obj:
-          heading = usf.read_until(the_file, heading_separators, [':'])
-          if not heading:
-            print("Error in PreOrder.__init__: in \'"+\
-            name_of_file+"\': \'obj:\' was not found")
-            exit()
-          if heading[-1] == "!obj":
-            self.mask = True
-            flag_obj = True
-          elif heading[-1] == "obj":
-            flag_obj = True
+    self = PreOrder(relations=[], transitive=False, mask=False, cartesian=cartesian)
 
-        #Search the key word 'rel:'
-        flag_rel = False
-        while not flag_rel:
-          line = usf.read_until(the_file, separators, ['#',':'], inclusive=True)
-          objects = []
+    with open(filename, "r") as the_file:
+
+      #Search the key words '!obj:' or 'obj:'
+      list_of_objects = []
+      flag_obj = False
+      while not flag_obj:
+        heading = usf.read_until(the_file, heading_separators, [':'])
+        if not heading:
+          print("Error in PreOrder.__init__: in \'"+\
+          filename+"\': \'obj:\' was not found")
+          exit()
+        if heading[-1] == "!obj":
+          self.mask = True
+          flag_obj = True
+        elif heading[-1] == "obj":
+          flag_obj = True
+
+      #Search the key word 'rel:'
+      flag_rel = False
+      while not flag_rel:
+        line = usf.read_until(the_file, separators, ['#',':'], inclusive=True)
+        objects = []
+        if line == ['']:
+          break
+        if len(line) > 1 and line[-2:] == ["rel", ":"]:
+          objects = line[:-2]
+          flag_rel = True
+        else:
+          objects = line[:-1]
+          usf.read_until(the_file, separators, ['\n'])
+
+        #Construct [list_of_objects] and [self.relations]
+        for obj in objects:
+            add_to(obj, list_of_objects)
+            add_to([obj], self.relations)
+
+      #If the key word 'rel:' is not found
+      if flag_rel == False:
+        return
+
+      #If the key word 'rel:' was found, search the symbols '>' and ';'
+      flag_EOF = False
+      while not flag_EOF:
+
+        all_successors = []
+        flag_succ = False
+        while not flag_succ:
+          line = usf.read_until(the_file, separators, ['#', '>'], inclusive=True)
+          successors = []
           if line == ['']:
             break
-          if len(line) > 1 and line[-2:] == ["rel", ":"]:
-            objects = line[:-2]
-            flag_rel = True
+          if line[-1] == ">":
+            successors = line[:-1]
+            flag_succ = True
           else:
-            objects = line[:-1]
+            successors = line[:-1]
             usf.read_until(the_file, separators, ['\n'])
 
-          #Construct [list_of_objects] and [self.relations]
-          for obj in objects:
-              add_to(obj, list_of_objects)
-              add_to([obj], self.relations)
+        #Construct [all_successors]
+        for successor in successors:
+            add_to(successor, all_successors)
 
-        #If the key word 'rel:' is not found
-        if flag_rel == False:
-          return
+        #Complete [self.relations] with [predecessors] for each successor
+        predecessors = usf.read_until(the_file, separators, [';'])
+        if not all_successors or not predecessors:
+          flag_EOF = True
+        for successor in all_successors:
+          try:
+            index = list_of_objects.index(successor)
+            for predecessor in predecessors:
+              add_to(predecessor, self.relations[index])
+          except:
+            print("Warning in PreOrder.__init__: in \'"+\
+            filename+"\': "+ successor+" is not an object")
 
-        #If the key word 'rel:' was found, search the symbols '>' and ';'
-        flag_EOF = False
-        while not flag_EOF:
-
-          all_successors = []
-          flag_succ = False
-          while not flag_succ:
-            line = usf.read_until(the_file, separators, ['#', '>'], inclusive=True)
-            successors = []
-            if line == ['']:
-              break
-            if line[-1] == ">":
-              successors = line[:-1]
-              flag_succ = True
-            else:
-              successors = line[:-1]
-              usf.read_until(the_file, separators, ['\n'])
-
-          #Construct [all_successors]
-          for successor in successors:
-              add_to(successor, all_successors)
-
-          #Complete [self.relations] with [predecessors] for each successor
-          predecessors = usf.read_until(the_file, separators, [';'])
-          if not all_successors or not predecessors:
-            flag_EOF = True
-          for successor in all_successors:
-            try:
-              index = list_of_objects.index(successor)
-              for predecessor in predecessors:
-                add_to(predecessor, self.relations[index])
-            except:
-              print("Warning in PreOrder.__init__: in \'"+\
-              name_of_file+"\': "+ successor+" is not an object")
+    return self
 #------------------------------------------------------------------------------
   def closure(self):
     if not self.transitive:

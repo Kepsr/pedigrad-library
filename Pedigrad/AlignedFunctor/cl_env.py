@@ -2,13 +2,13 @@
 #Environment (Class) | 4 objects | 3 methods
 #------------------------------------------------------------------------------
 '''
-[Objects] 
+[Objects]
   .Seg  [Type] CategoryOfSegments('a)
   .pset [Type] PointedSet('b)
   .spec [Type] int
   .b    [Type] list('a)
 
-[Methods] 
+[Methods]
   .__init__
         [Inputs: 4]
           - Seg       [Type] CategoryOfSegments('a)
@@ -27,29 +27,29 @@
           - name_of_file [Type] string
         [Outputs: 1]
           - return [Type] SequenceAlignment
-                     
-[General description] 
+
+[General description]
   This structure models the features of an aligned environment functors, as defined in CTGI. As in aligned environment functors, this structure is associated with a PointedSet item [pset]. The class is also equipped with a fiber operation (pullback along a point in the image of the functor) and a sequence alignment functor constructor call. Specifically, the method [segment] returns a segment that is the pullback of the aligned environment functor above any input list that represents an element in one of its images. If the input list contains a character that is not in the object [pset.symbols], then the node associated with that character is masked in the returned segment. Aditionally, the method [seqali] construct a sequence aligment functor  from a file a sequence alignments, as shown in the development of CGTI.
-    
+
 >>> Method: .__init__
-  [Actions] 
+  [Actions]
     .Seg    <- use(Seg)
     .pset   <- use(pset)
     .spec   <- use(exponent)
     .b       <- use(threshold,Seg,spec)
-  [Description] 
+  [Description]
     This is the constructor of the class.
-    
+
 >>> Method: .segment
-  [Actions] 
+  [Actions]
     .return   <- use(a_list,color,self.Seg,self.pset)
-  [Description] 
-    This method returns a segment that is the pullback of the underlying environment functor above the input list. If the list contains a character that is not in the list self.pset.symbols, then the node associated with that character is masked in the returned segment. 
-    
+  [Description]
+    This method returns a segment that is the pullback of the underlying environment functor above the input list. If the list contains a character that is not in the list self.pset.symbols, then the node associated with that character is masked in the returned segment.
+
 >>> Method: .seqali
-  [Actions] 
+  [Actions]
     .return  <- use(name_of_file,usf.fasta,self.Seg,self.b)
-  [Description] 
+  [Description]
     This method constructs a sequence aligment functor from a file of sequence alignments, as shown in the development of Example 3.22 of CTGI.
 
 '''
@@ -59,78 +59,74 @@
 from .cl_sal import SequenceAlignment
 
 from Pedigrad.SegmentCategory.cl_so import SegmentObject
+from Pedigrad.SegmentCategory.cl_cos import CategoryOfSegments
 
 from Pedigrad.Useful.usf import usf, add_to
 #------------------------------------------------------------------------------
 #CODE
 #------------------------------------------------------------------------------
-class Environment: 
+class Environment:
 #------------------------------------------------------------------------------
-  def __init__(self,Seg,pset,exponent,threshold):
+  def __init__(self, Seg: CategoryOfSegments, pset, exponent: int, threshold: list):
     self.Seg = Seg
     self.pset = pset
     self.spec = exponent
     self.b = threshold
     for i in range(len(self.b)):
-      if not(self.Seg.preorder.presence(self.b[i])):
+      if not self.Seg.preorder.presence(self.b[i]):
         self.b[i] = self.Seg.preorder.mask
-    for i in range(len(self.b),self.spec):
+    for i in range(len(self.b), self.spec):
       self.b.append(self.Seg.preorder.mask)
-#------------------------------------------------------------------------------   
-  def segment(self,a_list,color):
-    removal = list()
-    for i in range(len(a_list)):
-      if not(a_list[i] in self.pset.symbols):
-        removal.append(i)
-    segment = self.Seg.initial(len(a_list),color)
-    return segment.remove(removal,'nodes-given')
-#------------------------------------------------------------------------------  
+#------------------------------------------------------------------------------
+  def segment(self, a_list, color):
+    removal = [i for i, item in enumerate(a_list) if item not in self.pset.symbols]
+    return self.Seg.initial(len(a_list), color).remove(removal, 'nodes-given')
+#------------------------------------------------------------------------------
   def seqali(self,name_of_file):
-    group_labels = list()
-    indiv = list()
+    group_labels = []
+    indiv = []
     names,sequences = usf.fasta(name_of_file)
-    for i in range(len(names)):
-      add_to(names[i][0],group_labels)
-      add_to(names[i][1],indiv)
+    for name in names:
+      x, y, *_ = name
+      add_to(x, group_labels)
+      add_to(y, indiv)
     if len(indiv) > len(self.b):
       print("Error in Environment.seqali: "+name_of_file+" contains more individuals than the number specified in the environment.")
       exit()
-    elif len(indiv) < len(self.b):
+    if len(indiv) < len(self.b):
       print("Error in Environment.seqali: "+name_of_file+" contains fewer individuals than the number specified in the environment.")
       exit()
-    else:  
-      group_colors = list()
-      alignments = list()
-      check_lengths = list()
-      for i in range(len(group_labels)):
-        group_colors.append([self.Seg.preorder.mask]*len(indiv))
-        alignments.append(['masked']*len(indiv))
-        check_lengths.append([])
-      for i in range(len(names)):
-        gl = group_labels.index(names[i][0])
-        ind = indiv.index(names[i][1])
-        if self.Seg.preorder.geq(names[i][2],self.b[ind]) or self.b[ind] == True:
-          group_colors[gl][ind] = names[i][2]
-          alignments[gl][ind] = sequences[i]
-          add_to(len(alignments[gl][ind]),check_lengths[gl])
-      record = list()
-      indexing = list()
-      for i in range(len(group_labels)):
-        if len(check_lengths[i]) == 1:
-          schema = [check_lengths[i][0],group_colors[i]]
-          indexing.append([schema,True])
-          add_to(schema,record)
-        else:
-          indexing.append([[],False])
-      base = list()
-      for i in range(len(record)):
-        base.append(self.Seg.initial(*record[i]))
-      database = list()
-      for i in range(len(record)):
-        database.append([])
-      for i in range(len(group_labels)):
-        if indexing[i][1] == True:
-          index = record.index(indexing[i][0])
-          database[index].append(alignments[i])     
-      return SequenceAlignment(self,indiv,base,database)
+
+    group_colors = []
+    alignments = []
+    check_lengths = []
+    for _ in group_labels:
+      group_colors.append([self.Seg.preorder.mask] * len(indiv))
+      alignments.append(['masked'] * len(indiv))
+      check_lengths.append([])
+    for i, name in enumerate(names):
+      gl, ind, x = name
+      gli = group_labels.index(gl)
+      indi = indiv.index(ind)
+      if self.Seg.preorder.geq(x, self.b[indi]) or self.b[indi] == True:
+        group_colors[gli][indi] = x
+        alignments[gli][indi] = sequences[i]
+        add_to(len(alignments[gli][indi]), check_lengths[gli])
+    record = []
+    indexing = []
+    assert len(group_labels) == len(check_lengths) == len(group_colors)
+    for check_length, color in zip(check_lengths, group_colors):
+      if len(check_length) == 1:
+        schema = [check_length[0], color]
+        indexing.append([schema, True])
+        add_to(schema, record)
+      else:
+        indexing.append([[], False])
+    base = [self.Seg.initial(*x) for x in record]
+    database = [[] for _ in record]
+    assert len(group_labels) == len(indexing) == len(alignments)
+    for (x, y), alignment in zip(indexing, alignments):
+      if y:
+        database[record.index(x)].append(alignment)
+    return SequenceAlignment(self, indiv, base, database)
 #------------------------------------------------------------------------------

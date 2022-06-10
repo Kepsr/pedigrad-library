@@ -3,7 +3,7 @@ sys.path.insert(0, '../')
 
 from Pedigrad import *
 
-Omega = PreOrder("omega.yml")
+Omega = PreOrder.from_file("omega.yml")
 print(Omega.relations)
 print(Omega.mask)
 print(Omega.cartesian)
