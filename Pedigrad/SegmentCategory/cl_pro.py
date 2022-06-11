@@ -126,7 +126,7 @@ from functools import reduce
 #------------------------------------------------------------------------------
 class PreOrder:
 #------------------------------------------------------------------------------
-  def __init__(self, relations: list, transitive: bool, mask: bool, cartesian):
+  def __init__(self, relations: list, transitive: bool, mask: bool, cartesian: int):
     self.relations = relations
     self.transitive = transitive
     self.mask = mask
@@ -138,74 +138,68 @@ class PreOrder:
 
   @staticmethod
   def from_file(filename: str, cartesian = 0):
-      # if not filename:
-      #   print("Error in PreOrder.__init__: name of file is empty")
-      #   exit()
+    assert filename, "filename cannot be empty"
 
     self = PreOrder(relations=[], transitive=False, mask=False, cartesian=cartesian)
 
-    with open(filename, "r") as the_file:
+    with open(filename, "r") as file:
 
-      #Search the key words '!obj:' or 'obj:'
+      # Search the key words '!obj:' or 'obj:'
       list_of_objects = []
-      flag_obj = False
-      while not flag_obj:
-        heading = usf.read_until(the_file, heading_separators, [':'])
+      while True:
+        heading = usf.read_until(file, heading_separators, [':'])
         if not heading:
-          print("Error in PreOrder.__init__: in \'"+\
-          filename+"\': \'obj:\' was not found")
-          exit()
+          raise Exception(f"\'obj:\' was not found im {filename}")
         if heading[-1] == "!obj":
           self.mask = True
-          flag_obj = True
-        elif heading[-1] == "obj":
-          flag_obj = True
+          break
+        if heading[-1] == "obj":
+          break
 
-      #Search the key word 'rel:'
-      flag_rel = False
-      while not flag_rel:
-        tokens = usf.read_until(the_file, separators, ['#',':'], inclusive=True)
+      # Search the key word 'rel:'
+      found_rel = False
+      while not found_rel:
+        tokens = usf.read_until(file, separators, ['#', ':'], inclusive=True)
         if tokens == ['']:
           break
-        if len(tokens) > 1 and tokens[-2:] == ["rel", ":"]:
+        if tokens[-2:] == ["rel", ":"]:
           objects = tokens[:-2]
-          flag_rel = True
+          found_rel = True
         else:
           objects = tokens[:-1]
-          usf.read_until(the_file, separators, ['\n'])
+          usf.read_until(file, separators, ['\n'])
 
-        #Construct [list_of_objects] and [self.relations]
+        # Construct [list_of_objects] and [self.relations]
         for obj in objects:
-            add_to(obj, list_of_objects)
-            add_to([obj], self.relations)
+          # assert obj in list_of_objects == [obj] in self.relations
+          add_to(obj, list_of_objects)
+          add_to([obj], self.relations)
 
-      #If the key word 'rel:' is not found
-      if not flag_rel:
+      if not found_rel:
+        # If the key word 'rel:' is not found
         return
 
-      #If the key word 'rel:' was found, search the symbols '>' and ';'
+      # If the key word 'rel:' was found, search the symbols '>' and ';'
       while True:
 
-        flag_succ = False
-        while not flag_succ:
-          tokens = usf.read_until(the_file, separators, ['#', '>'], inclusive=True)
+        while True:
+          tokens = usf.read_until(file, separators, ['#', '>'], inclusive=True)
           successors = []
           if tokens == ['']:
             break
+          successors = tokens[:-1]
           if tokens[-1] == ">":
-            successors = tokens[:-1]
-            flag_succ = True
-          else:
-            successors = tokens[:-1]
-            usf.read_until(the_file, separators, ['\n'])
+            break
+          usf.read_until(file, separators, ['\n'])
 
         # Complete [self.relations] with [predecessors] for each successor
-        predecessors = usf.read_until(the_file, separators, [';'])
+        predecessors = usf.read_until(file, separators, [';'])
         for successor in set(successors):
           try:
-            index = list_of_objects.index(successor)
+            i = list_of_objects.index(successor)
             for predecessor in predecessors:
-              add_to(predecessor, self.relations[index])
+              if predecessor not in self.relations[i]:
+                self.relations[i].append(predecessor)
           except ValueError:  # successor is not in list_of_objects
             print(f"Warning: in \'{filename}\': {successor} is not an object")
         if not successors or not predecessors:
@@ -216,16 +210,19 @@ class PreOrder:
   def closure(self):
     if not self.transitive:
       self.transitive = True
-      for i, item in enumerate(self.relations):
+      for i, relation1 in enumerate(self.relations):
         keep_going = True
         while keep_going:
           keep_going = False
-          for elt in item:
-            for j, jtem in enumerate(self.relations):
-              if i != j and elt == jtem[0]:
-                for new_elt in jtem:
-                  keep_going = new_elt not in item
-                  add_to(new_elt, item)
+          for elt in relation1:
+            for j, relation2 in enumerate(self.relations):
+              if i != j and elt == relation2[0]:
+                for new_elt in relation2:
+                  if new_elt not in relation1:
+                    keep_going = True
+                    relation1.append(new_elt)
+                  else:
+                    keep_going = False
 #------------------------------------------------------------------------------
   def _geq(self, element1, element2):
     self.closure()

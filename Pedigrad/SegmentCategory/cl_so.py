@@ -96,7 +96,7 @@
 #------------------------------------------------------------------------------
 class SegmentObject:
 #------------------------------------------------------------------------------
-  def __init__(self, domain, topology: list, colors: list):
+  def __init__(self, domain: int, topology: list[list[int]], colors: list):
     assert len(colors) == len(topology), "lengths do not match"
     self.level = 0
     self.domain = domain
@@ -108,7 +108,7 @@ class SegmentObject:
     if not (0 <= self.parse < len(self.topology)):
       self.parse = 0
 #------------------------------------------------------------------------------
-  def patch(self, position, search = ">1"):
+  def patch(self, position: int, search = ">1"):
     self._start()
     if not (0 <= position < self.domain):
       return -1
@@ -173,7 +173,7 @@ class SegmentObject:
     self.parse = saved_parse
     yield ')'
 #------------------------------------------------------------------------------
-  def merge(self, folding_format, infimum):
+  def merge(self, folding_format: list, infimum):
     new_topology = []
     new_colors = []
     initial = 0
@@ -214,7 +214,7 @@ class SegmentObject:
 
     return SegmentObject(self.domain, new_topology, new_colors)
 #------------------------------------------------------------------------------
-  def remove(self, a_list, option = 'patches-given'):
+  def remove(self, a_list: list, option = 'patches-given'):
     removed_patches = [p for p in (
       map(self.patch, a_list) if option == 'nodes-given' else a_list
     ) if 0 <= p < len(self.topology)]  # Avoid p = -1
