@@ -14,7 +14,7 @@
           - words             [Type] list(string)
   usf.fasta
         [Inputs: 1]
-          - name_of_file  [Type] string
+          - filename  [Type] string
         [Outputs: 2]
           - names     [Type] list(list(string))
           - sequences [Type] list(string)
@@ -40,37 +40,36 @@
 class _Useful:
 #------------------------------------------------------------------------------
   @staticmethod
-  def read_until(a_file, separators, EOL_symbols, inclusive = False):
-    words = []
+  def read_until(file, separators, EOL_symbols, inclusive = False):
+    tokens = []
     blanks = EOL_symbols + ['']
-    read = a_file.read(1)
-    while read not in blanks:
-      while read in separators and read not in blanks:
-        read = a_file.read(1)
-      if read not in blanks:
-        word = ''
-        while read not in separators and read not in blanks:
-          word += read
-          read = a_file.read(1)
-        words.append(word)
+    char = file.read(1)
+    while char not in blanks:
+      while char in separators and char not in blanks:
+        char = file.read(1)
+      if char not in blanks:
+        token = ''
+        while char not in separators and char not in blanks:
+          token += char
+          char = file.read(1)
+        tokens.append(token)
     if inclusive:
-      words.append(read)
-    return words
+      tokens.append(char)
+    return tokens
 #------------------------------------------------------------------------------
   @staticmethod
-  def fasta(name_of_file):
+  def fasta(filename):
     names = []
     sequences = []
-    with open(name_of_file, 'r') as file:
-      flag_EOF = False
+    with open(filename, 'r') as file:
       usf.read_until(file, [], ['>'])
-      while not flag_EOF:
+      while True:
         name = usf.read_until(file, [':'], ['\n','\r'])
-        if name:
-          names.append(name)
-          sequences.append(''.join(usf.read_until(file, ['\n', '\r'], ['>'])))
-        else:
-          flag_EOF = True
+        if not name:
+          break
+        names.append(name)
+        sequences.append(''.join(usf.read_until(file, ['\n', '\r'], ['>'])))
+
     return (names, sequences)
 #------------------------------------------------------------------------------
 #  def trim(self,string,character,option = "suffix"):

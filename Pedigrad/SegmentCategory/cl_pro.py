@@ -164,15 +164,14 @@ class PreOrder:
       #Search the key word 'rel:'
       flag_rel = False
       while not flag_rel:
-        line = usf.read_until(the_file, separators, ['#',':'], inclusive=True)
-        objects = []
-        if line == ['']:
+        tokens = usf.read_until(the_file, separators, ['#',':'], inclusive=True)
+        if tokens == ['']:
           break
-        if len(line) > 1 and line[-2:] == ["rel", ":"]:
-          objects = line[:-2]
+        if len(tokens) > 1 and tokens[-2:] == ["rel", ":"]:
+          objects = tokens[:-2]
           flag_rel = True
         else:
-          objects = line[:-1]
+          objects = tokens[:-1]
           usf.read_until(the_file, separators, ['\n'])
 
         #Construct [list_of_objects] and [self.relations]
@@ -181,38 +180,36 @@ class PreOrder:
             add_to([obj], self.relations)
 
       #If the key word 'rel:' is not found
-      if flag_rel == False:
+      if not flag_rel:
         return
 
       #If the key word 'rel:' was found, search the symbols '>' and ';'
-      flag_EOF = False
-      while not flag_EOF:
+      while True:
 
         flag_succ = False
         while not flag_succ:
-          line = usf.read_until(the_file, separators, ['#', '>'], inclusive=True)
+          tokens = usf.read_until(the_file, separators, ['#', '>'], inclusive=True)
           successors = []
-          if line == ['']:
+          if tokens == ['']:
             break
-          if line[-1] == ">":
-            successors = line[:-1]
+          if tokens[-1] == ">":
+            successors = tokens[:-1]
             flag_succ = True
           else:
-            successors = line[:-1]
+            successors = tokens[:-1]
             usf.read_until(the_file, separators, ['\n'])
 
-        #Complete [self.relations] with [predecessors] for each successor
+        # Complete [self.relations] with [predecessors] for each successor
         predecessors = usf.read_until(the_file, separators, [';'])
-        if not successors or not predecessors:
-          flag_EOF = True
         for successor in set(successors):
           try:
             index = list_of_objects.index(successor)
             for predecessor in predecessors:
               add_to(predecessor, self.relations[index])
-          except:
-            print("Warning in PreOrder.__init__: in \'"+\
-            filename+"\': "+ successor+" is not an object")
+          except ValueError:  # successor is not in list_of_objects
+            print(f"Warning: in \'{filename}\': {successor} is not an object")
+        if not successors or not predecessors:
+          break  # EOF
 
     return self
 #------------------------------------------------------------------------------
