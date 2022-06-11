@@ -232,45 +232,44 @@ class PreOrder:
 #------------------------------------------------------------------------------
   def _geq(self, element1, element2):
     self.closure()
-    for relation in self.relations:
-      if relation[0] == element1:
-        return True and (element2 in relation)
-    return False and (element2 in self.relations[0])
+    return any(
+      relation[0] == element1 and element2 in relation
+      for relation in self.relations
+    )
 #------------------------------------------------------------------------------
-  def geq(self,element1, element2):
+  def geq(self, element1, element2):
     if self.cartesian == 0:
       return self._geq(element1, element2)
 
-    for i in range(self.cartesian):
-      if not element2[i] and not self._geq(element1[i], element2[i]):
-        return False
-    return True
+    return all(
+      element2[i] or self._geq(element1[i], element2[i])
+      for i in range(self.cartesian)
+    )
 #------------------------------------------------------------------------------
-  def _inf(self,element1,element2):
+  def _inf(self, element1, element2):
     self.closure()
-    relation1 = self.relations[0]
-    relation2 = self.relations[0]
     found_relation1 = False
     found_relation2 = False
-    # In a single pass, 
-    # find the first instance of element1
-    # and the first instance of element2
+    # In a single pass,
+    # find a relation whose first element is element1
+    # and a relation whose first element is element2
+    # assert not any(x == y and i != j for i, x in enumerate(self.relations) for j, y in enumerate(self.relations))
     for relation in self.relations:
       if relation[0] == element1:
-        found_relation1 = True
         relation1 = relation
+        found_relation1 = True
       if relation[0] == element2:
-        found_relation2 = True
         relation2 = relation
+        found_relation2 = True
       if found_relation1 and found_relation2:
         break
     else:
       return self.mask
-    intersect = set(relation1) & set(relation2)
-    if not intersect:
+    intersection = set(relation1) & set(relation2)
+    if not intersection:
       return self.mask
 
-    return reduce(lambda x, y: x if self.geq(x, y) else y, intersect)
+    return reduce(lambda x, y: x if self.geq(x, y) else y, intersection)
 #------------------------------------------------------------------------------
   def inf(self, element1, element2):
     if self.cartesian == 0:
