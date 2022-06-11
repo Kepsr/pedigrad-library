@@ -76,7 +76,7 @@ def inclusions(start: int, domain: int, holes: int) -> list[list[int]]:
         [Outputs: 2]
           - return  [Type] list(list(int))
 
-  >>> Function: usf.inclusions
+  >>> Function: inclusions
   [Description]
     This function computes the list of lists f whose implicit mappings i -> f[i] represent increasing inclusions from the ordered set {0,1,...,domain-holes-1} to the ordered set {start,start+1,...,start+domain-1}
   '''
@@ -99,20 +99,20 @@ class CategoryOfSegments:
     self.preorder = preorder
 #------------------------------------------------------------------------------
   @staticmethod
-  def identity(segment1, segment2):
+  def identity(segment1: SegmentObject, segment2: SegmentObject):
     return segment1.domain   == segment2.domain \
     and    segment1.topology == segment2.topology \
     and    segment1.colors   == segment2.colors
 #------------------------------------------------------------------------------
   @staticmethod
-  def initial(domain, color):
+  def initial(domain: int, color: list):
     return SegmentObject(
       domain,
       topology=[(i, i) for i in range(domain)],
       colors=[color] * domain
     )
 #------------------------------------------------------------------------------
-  def homset(self, source, target):
+  def homset(self, source: SegmentObject, target: SegmentObject):
     if target.domain - source.domain < 0:
       return []
 
