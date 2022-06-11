@@ -95,8 +95,6 @@ class Tree(object):
 
     l = []
     for child in self.children:
-      l.extend(child.paths())
-    for path in l:
-      path.insert(0, self.parent)
+      l.extend([[self.parent, *path] for path in child.paths()])
     return l
 #------------------------------------------------------------------------------          
