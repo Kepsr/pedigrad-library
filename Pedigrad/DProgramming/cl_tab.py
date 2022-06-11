@@ -91,15 +91,9 @@ class Table:
     if not choices:
       return Tree("leaf")
 
-    children = []
-    for x, y, m in choices:
-      children.append(self.tree(x, y, m))
-      s1 = self.seq1.seq[i]
-      s2 = self.seq2.seq[j]
-      if i == -1:
-        s1 = '-'
-      if j == -1:
-        s2 = '-'
+    children = [self.tree(x, y, m) for x, y, m in choices]
+    s1 = '-' if i == -1 else self.seq1.seq[i]
+    s2 = '-' if j == -1 else self.seq2.seq[j]
     return Tree([s1, s2, move], children)
 #-----------------------------------------------------------------------------
   def traceback(self, debug: bool):
