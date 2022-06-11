@@ -59,25 +59,21 @@ class MorphismOfSegments:
     self.defined = True
     self.f0 = []
 
-    #Handle the various formats that the variable f1 can take
-    if self.source.domain == self.target.domain or f1 =='id':
-      self.f1 = 'id'
-      maxf1 = self.target.domain - 1
-      lenf1 = self.source.domain
-    else:
-      self.f1 = f1
-      maxf1 = max(f1)
-      lenf1 = len(f1)
+    if self.source.domain == self.target.domain:
+      assert len(f1) == self.source.domain
+      assert max(f1) == self.target.domain - 1
+
+    self.f1 = f1
 
     # Check that the morphism is valid
-    if lenf1 == self.source.domain and maxf1 <= self.target.domain - 1:
+    if len(f1) == self.source.domain and max(f1) <= self.target.domain - 1:
       self.target.parse = 0
       self.source.parse = 0
 
       # Check that a commutative diagram commutes
       mapping = [
-        (self.source.patch(i), self.target.patch(i if f1 == 'id' else f1[i]))
-        for i in range(lenf1)
+        (self.source.patch(i), self.target.patch(j))
+        for i, j in enumerate(f1)
       ]
       if not self._compute_f0(mapping):
         self.defined = False
