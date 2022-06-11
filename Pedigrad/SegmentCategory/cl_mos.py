@@ -44,17 +44,16 @@
   the function in the object [f0].
 '''
 #------------------------------------------------------------------------------
-#Dependencies: sys, Useful
-#------------------------------------------------------------------------------
-from Pedigrad.Useful.usf import add_to
+from Pedigrad.SegmentCategory.cl_so import SegmentObject
 #------------------------------------------------------------------------------
 #CODE
 #------------------------------------------------------------------------------
 class MorphismOfSegments:
 #------------------------------------------------------------------------------
-  def __init__(self, source, target, f1, geq):
-    self.level = 1
+  def __init__(self, source: SegmentObject, target: SegmentObject, f1: list[int], geq):
     assert source.level == target.level == 0
+    assert type(source) is type(target) is SegmentObject
+    self.level = 1
     self.source = source
     self.target = target
     self.defined = True
@@ -92,16 +91,15 @@ class MorphismOfSegments:
     else:
       self.defined = False
 #------------------------------------------------------------------------------
-  def _compute_f0(self, mapping):
+  def _compute_f0(self, mapping: list[tuple]):
     self.f0 = []
     if not mapping:
       return True
 
-    sorted_map = mapping[:]
-    sorted_map.sort(key = lambda x: x[0])
+    sorted_mapping = sorted(mapping, key = lambda x: x[0])
     i = 0
-    while i < len(sorted_map):
-      x, y = sorted_map[i][0:2]
+    while i < len(sorted_mapping):
+      x, y = sorted_mapping[i]
       i += 1
       #if x is masked, then y has to be masked
       if x == -1:
@@ -109,13 +107,13 @@ class MorphismOfSegments:
           return False
       #if x is not masked, then y = f(x) has to be unique
       else:
-        image_x = [y]
-        while i < len(sorted_map) and sorted_map[i][0] == x:
-          add_to(sorted_map[i][1], image_x)
+        # Check the uniqueness of y = f(x)
+        for x2, y2 in sorted_mapping[i:]:
+          if x2 != x:
+            break
+          if y2 != y:
+            return False
           i += 1
-        #Check the uniqueness of y = f(x)
-        if len(image_x) > 1:
-          return False
-        self.f0 += image_x
+        self.f0.append(y)
     return True
 #------------------------------------------------------------------------------
