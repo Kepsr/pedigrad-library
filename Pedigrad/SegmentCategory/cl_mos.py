@@ -47,14 +47,16 @@
 #Dependencies: sys, Useful
 #------------------------------------------------------------------------------
 from Pedigrad.Useful.usf import add_to
-from Pedigrad.Useful.cat import CategoryItem
 #------------------------------------------------------------------------------
 #CODE
 #------------------------------------------------------------------------------
-class MorphismOfSegments(CategoryItem):
+class MorphismOfSegments:
 #------------------------------------------------------------------------------
   def __init__(self, source, target, f1, geq):
-    super().__init__(1, source, target)
+    self.level = 1
+    assert source.level == target.level == 0
+    self.source = source
+    self.target = target
     self.defined = True
     self.f0 = []
 

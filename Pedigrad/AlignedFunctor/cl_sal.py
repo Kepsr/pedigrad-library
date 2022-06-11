@@ -27,11 +27,6 @@
           - segment   [Type] SegmentObject
         [Outputs: 1]
           - outputs   [Type] list(int * MorphismOfSegments)
-  .ran
-        [Inputs: 1]
-          - cat_item    [Type] CategoryItem
-        [Outputs: 1]
-          - outputs         [Type] 'a
         
 [General description] 
   This structure models the features of a sequence alignment functor, as defined in CTGI. The images of the sequence alignment functor are stored in the object [database] and can be queried throught the method [eval]. The method also computes the images of the right Kan extension of this functor through the method [ran] (TO BE CODED). The extending category (see CTGI) used to compute this right Kan extension can be computed through the method [extending_category] (TO BE COMPLETED WITH ARROWS).
