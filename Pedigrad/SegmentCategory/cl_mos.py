@@ -56,36 +56,39 @@ class MorphismOfSegments:
     self.level = 1
     self.source = source
     self.target = target
-    self.defined = True
     self.f0 = []
-
-    if self.source.domain == self.target.domain:
-      assert len(f1) == self.source.domain
-      assert max(f1) == self.target.domain - 1
-
     self.f1 = f1
 
-    # Check that the morphism is valid
-    if len(f1) == self.source.domain and max(f1) <= self.target.domain - 1:
-      self.target.parse = 0
-      self.source.parse = 0
+    if source.domain == target.domain:
+      assert len(f1) == source.domain
+      assert max(f1) == target.domain - 1
 
-      # Check that a commutative diagram commutes
-      mapping = [
-        (self.source.patch(i), self.target.patch(j))
-        for i, j in enumerate(f1)
-      ]
-      if not self._compute_f0(mapping):
-        self.defined = False
+    self.defined = self.is_valid(geq)
 
-      # Check that colors decrease from source to target
-      for i, j in enumerate(self.f0):
-        if j != -1 \
-        and not geq(self.source.colors[i], self.target.colors[j]):
-          self.defined = False
-          break
-    else:
-      self.defined = False
+  def is_valid(self, geq):
+    # Is this morphism valid?
+    if len(self.f1) != self.source.domain \
+    or max(self.f1) > self.target.domain - 1:
+      return False
+
+    self.target.parse = 0
+    self.source.parse = 0
+
+    # Check that a commutative diagram commutes
+    mapping = [
+      (self.source.patch(i), self.target.patch(j))
+      for i, j in enumerate(self.f1)
+    ]
+    if not self._compute_f0(mapping):
+      return False
+
+    # Check that colors decrease from source to target
+    for i, j in enumerate(self.f0):
+      if j != -1 \
+      and not geq(self.source.colors[i], self.target.colors[j]):
+        return False
+
+    return True
 #------------------------------------------------------------------------------
   def _compute_f0(self, mapping: list[tuple]):
     self.f0 = []
