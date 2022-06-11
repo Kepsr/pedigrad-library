@@ -93,8 +93,8 @@ class Tree(object):
     if self.parent == 'leaf':
       return [[]]
 
-    l = []
-    for child in self.children:
-      l.extend([[self.parent, *path] for path in child.paths()])
-    return l
+    return sum((
+      [[self.parent, *path] for path in child.paths()]
+      for child in self.children
+    ), [])
 #------------------------------------------------------------------------------          
