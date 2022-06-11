@@ -30,9 +30,9 @@
 #------------------------------------------------------------------------------
 #CODE
 #------------------------------------------------------------------------------
-class Sequence(object): 
+class Sequence: 
 #------------------------------------------------------------------------------
-  def __init__(self,name,sequence,color):
+  def __init__(self, name, sequence, color):
     self.name = name
     self.seq = sequence
     self.color = color

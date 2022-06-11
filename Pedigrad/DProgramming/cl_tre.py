@@ -63,7 +63,7 @@ import sys
 #------------------------------------------------------------------------------
 class Tree(object):
 #------------------------------------------------------------------------------
-  def __init__(self,parent,*args):
+  def __init__(self, parent, *args):
     self.depth = 0
     self.level = 0
     self.parent = parent
@@ -78,25 +78,25 @@ class Tree(object):
   def stdout(self):
     if self.parent != 'leaf':
       n = self.level
-      sys.stdout.write("."*n)
-      sys.stdout.write("["+str(self.level)+"] -> "+str(self.parent)+"\n")
-      for i in range(len(self.children)):
-        self.children[i].stdout()
+      sys.stdout.write("." * n)
+      sys.stdout.write(f"[{self.level}] -> {self.parent}\n")
+      for child in self.children:
+        child.stdout()
 #------------------------------------------------------------------------------  
   def levelup(self):
-    self.level = self.level + 1
+    self.level += 1
     if self.parent != 'leaf':
-      for i in range(len(self.children)):
-        self.children[i].levelup()
+      for child in self.children:
+        child.levelup()
 #------------------------------------------------------------------------------
   def paths(self):
-    l = list()
     if self.parent == 'leaf':
       return [[]]
-    else:
-      for i in range(len(self.children)):
-        l = l + self.children[i].paths()
-      for i in range(len(l)):
-        l[i] = [self.parent] + l[i]
-      return l
+
+    l = []
+    for child in self.children:
+      l.extend(child.paths())
+    for path in l:
+      path.insert(0, self.parent)
+    return l
 #------------------------------------------------------------------------------          

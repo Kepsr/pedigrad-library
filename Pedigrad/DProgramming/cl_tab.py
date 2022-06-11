@@ -32,50 +32,46 @@
 import sys
 from .cl_tre import Tree
 
-from Pedigrad.Useful.usf import usf
 #------------------------------------------------------------------------------
 #CODE
 #-----------------------------------------------------------------------------
-class Table(object):
+class Table:
 #-----------------------------------------------------------------------------
-  def __init__(self,seq1,seq2):
+  def __init__(self, seq1, seq2):
     self.seq1 = seq1
     self.seq2 = seq2
-    self.content = list()
-    for i in range(len(self.seq1.seq)+2):
-      row = list()
-      for j in range(len(self.seq2.seq)+2):
-        row.append('.')
-      self.content.append(row)
+    self.content = [[
+      '.'
+      for j in range(len(self.seq2.seq) + 2)
+    ] for i in range(len(self.seq1.seq) + 2)]
     self.content[0][0] = '.'
     self.content[1][1] = 0
-    for i in range(len(self.seq1.seq)):
-      self.content[i+2][0] = self.seq1.seq[i]
+    for i, x in enumerate(self.seq1.seq):
+      self.content[i+2][0] = x
       self.content[i+2][1] = 0
-    for i in range(len(self.seq2.seq)):
-      self.content[0][i+2] = self.seq2.seq[i]
-      self.content[1][i+2] = 0
+    for j, y in enumerate(self.seq2.seq):
+      self.content[0][j+2] = y
+      self.content[1][j+2] = 0
 #-----------------------------------------------------------------------------
   def incidence(self):
-    for i in range(len(self.seq1.seq)):
-      for j in range(len(self.seq2.seq)):
-        if self.seq1.seq[i] != self.seq2.seq[j]:
-          self.content[i+2][j+2] = 0
-        else:
-          self.content[i+2][j+2] = 1
+    for i, x in enumerate(self.seq1.seq):
+      for j, y in enumerate(self.seq2.seq):
+        self.content[i+2][j+2] = 1 if x == y else 0
 #-----------------------------------------------------------------------------
   def fillout(self):
-    for i in range(len(self.seq1.seq)):
-      for j in range(len(self.seq2.seq)):
-        if self.seq1.seq[i] == self.seq2.seq[j]:
-          self.content[i+2][j+2] = max(self.content[i+2][j+2] + self.content[i+1][j+1],self.content[i+2][j+1],self.content[i+1][j+2])
-        else:
-          self.content[i+2][j+2] = max(self.content[i+2][j+2],self.content[i+2][j+1],self.content[i+1][j+2])
+    for i, x in enumerate(self.seq1.seq):
+      for j, y in enumerate(self.seq2.seq):
+        self.content[i+2][j+2] = max(
+          self.content[i+2][j+2] + self.content[i+1][j+1] if x == y else
+          self.content[i+2][j+2],
+          self.content[i+2][j+1], 
+          self.content[i+1][j+2]
+        )
 #-----------------------------------------------------------------------------
-  def choices(self,i,j):
-    choices = list()
-    if 0 <= i <len(self.seq1.seq) and 0 <= j < len(self.seq2.seq):
-      m = max(self.content[i+2][j+2],self.content[i+2][j+1],self.content[i+1][j+2])
+  def choices(self, i: int, j: int):
+    choices = []
+    if 0 <= i < len(self.seq1.seq) and 0 <= j < len(self.seq2.seq):
+      m = max(self.content[i+2][j+2], self.content[i+2][j+1], self.content[i+1][j+2])
       #diagonal
       if self.seq1.seq[i] == self.seq2.seq[j] and self.content[i+2][j+2] == m:
         choices.append([i-1,j-1,'d'])
@@ -90,79 +86,79 @@ class Table(object):
       choices.append([i-1,j,'v'])
     return choices
 #-----------------------------------------------------------------------------        
-  def tree(self,i,j,move):
-    choices = self.choices(i,j)
-    if choices == []:
+  def tree(self, i: int, j: int, move):
+    choices = self.choices(i, j)
+    if not choices:
       return Tree("leaf")
-    else:
-      children = list()
-      for x,y,m in choices:
-        children.append(self.tree(x,y,m))
-        s1 = self.seq1.seq[i]
-        s2 = self.seq2.seq[j]
-        if i == -1:
-          s1 = '-'
-        if j == -1:
-          s2 = '-'
-      return  Tree([s1,s2,move],children)
+
+    children = []
+    for x, y, m in choices:
+      children.append(self.tree(x, y, m))
+      s1 = self.seq1.seq[i]
+      s2 = self.seq2.seq[j]
+      if i == -1:
+        s1 = '-'
+      if j == -1:
+        s2 = '-'
+    return Tree([s1, s2, move], children)
 #-----------------------------------------------------------------------------
-  def traceback(self,debug):
-    tree = self.tree(len(self.seq1.seq)-1,len(self.seq2.seq)-1,'end')   
-    if debug == True:
+  def traceback(self, debug: bool):
+    tree = self.tree(len(self.seq1.seq) - 1, len(self.seq2.seq) - 1, 'end')   
+    if debug:
       print("\ntree")
       tree.stdout()
     return tree.paths()
 #-----------------------------------------------------------------------------    
-  def read_path(self,path,move):
-    if path == []:
+  def read_path(self, path: str, move: str):
+    if not path:
       return [], []
-    else:
-      seq1 = list()
-      seq2 = list()
-      head = path[len(path)-1]
-      if move in ['d','start']:
-        seq1.append(head[0])
-        seq2.append(head[1])
-      if move == 'h':
-        seq1.append('-')
-        seq2.append(head[1])
-      if move == 'v':
-        seq1.append(head[0])
-        seq2.append('-')
-      new_path = path[0:len(path)-1]
-      s1,s2 = self.read_path(new_path,head[2])
-      return seq1 + s1, seq2 + s2
+
+    seq1 = []
+    seq2 = []
+    head = path[-1]
+    if move in ['d', 'start']:
+      seq1.append(head[0])
+      seq2.append(head[1])
+    if move == 'h':
+      seq1.append('-')
+      seq2.append(head[1])
+    if move == 'v':
+      seq1.append(head[0])
+      seq2.append('-')
+    new_path = path[0:-1]
+    s1, s2 = self.read_path(new_path, head[2])
+    return seq1 + s1, seq2 + s2
 #-----------------------------------------------------------------------------
-  def dynamic_programming(self,name_of_file,option="a",debug=False,display=True):
+  def dynamic_programming(self, filename: str, mode: str = 'a', debug=False, display=True):
     paths = self.traceback(debug)
-    outputs = list()
-    if debug == True:
+    if debug:
         print("\npaths")
-    for i in range(len(paths)):
-      outputs.append(self.read_path(paths[i],'start'))
-      if debug == True:
-        print(paths[i])
-    with open(name_of_file,option) as the_file:
-      for i in range(len(outputs)):
-        n1 = ">"+str(i)+":"+str(self.seq1.name)+":"+str(self.seq1.color)+"\n"
-        s1 = ''.join(outputs[i][0])+"\n"
-        n2 = ">"+str(i)+":"+str(self.seq2.name)+":"+str(self.seq2.color)+"\n"
-        s2 = ''.join(outputs[i][1])+"\n"
-        the_file.write(n1)
-        the_file.write(s1)
-        the_file.write(n2)
-        the_file.write(s2)  
-        if display == True:  
-          sys.stdout.write(n1)
-          sys.stdout.write(s1)
-          sys.stdout.write(n2)
-          sys.stdout.write(s2)
+    outputs = []
+    for path in paths:
+      outputs.append(self.read_path(path, 'start'))
+      if debug:
+        print(path)
+
+    with open(filename, mode) as file:
+      for i, output in enumerate(outputs):
+        assert len(output) == 2
+        x, y = output
+        n1 = f'>{i}:{self.seq1.name}:{self.seq1.color}'
+        s1 = ''.join(x)
+        n2 = f'>{i}:{self.seq2.name}:{self.seq2.color}'
+        s2 = ''.join(y)
+        for line in [n1, s1, n2, s2]:
+          file.write(line + '\n')  
+        if display:
+          for line in [n1, s1, n2, s2]:
+            sys.stdout.write(line + '\n')
+
     return outputs
 #----------------------------------------------------------------------------- 
   def stdout(self):
-    for a in range(len(self.content)):
-      for b in range(len(self.content[a])):
-        sys.stdout.write(str(self.content[a][b])+" | ")  
+    for x in self.content:
+      for y in x:
+        sys.stdout.write(str(y) + " | ")  
       sys.stdout.write('\n')
       sys.stdout.flush()
 #-----------------------------------------------------------------------------
