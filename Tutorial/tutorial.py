@@ -176,7 +176,7 @@ table.stdout()
 print("\nfillout")
 table.fillout() 
 table.stdout()
-table.dynamic_programming("dprog.fa",option = "w",debug = False,display = True)
+table.dynamic_programming("dprog.fa", mode = 'w', debug = False, display = True)
 
 print("\n------------------------\n")
 
