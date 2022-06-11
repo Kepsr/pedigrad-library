@@ -30,6 +30,7 @@
 #Dependencies: current, sys
 #------------------------------------------------------------------------------
 import sys
+from .cl_seq import Sequence
 from .cl_tre import Tree
 
 #------------------------------------------------------------------------------
@@ -37,7 +38,7 @@ from .cl_tre import Tree
 #-----------------------------------------------------------------------------
 class Table:
 #-----------------------------------------------------------------------------
-  def __init__(self, seq1, seq2):
+  def __init__(self, seq1: Sequence, seq2: Sequence):
     self.seq1 = seq1
     self.seq2 = seq2
     self.content = [[
@@ -72,18 +73,18 @@ class Table:
     choices = []
     if 0 <= i < len(self.seq1.seq) and 0 <= j < len(self.seq2.seq):
       m = max(self.content[i+2][j+2], self.content[i+2][j+1], self.content[i+1][j+2])
-      #diagonal
+      # diagonal
       if self.seq1.seq[i] == self.seq2.seq[j] and self.content[i+2][j+2] == m:
-        choices.append([i-1,j-1,'d'])
-      #vertical and horizontal   
+        choices.append([i-1, j-1, 'd'])
+      # vertical and horizontal   
       if self.content[i+2][j+1] == m:
-        choices.append([i,j-1,'h'])
+        choices.append([i, j-1, 'h'])
       if self.content[i+1][j+2] == m:
-        choices.append([i-1,j,'v'])
+        choices.append([i-1, j, 'v'])
     if i == -1 and 0 <= j < len(self.seq2.seq):
-      choices.append([i,j-1,'h'])
-    if 0 <= i <len(self.seq1.seq) and j == -1:
-      choices.append([i-1,j,'v'])
+      choices.append([i, j-1, 'h'])
+    if j == -1 and 0 <= i < len(self.seq1.seq):
+      choices.append([i-1, j, 'v'])
     return choices
 #-----------------------------------------------------------------------------        
   def tree(self, i: int, j: int, move):
@@ -119,19 +120,19 @@ class Table:
     if move == 'v':
       seq1.append(head[0])
       seq2.append('-')
-    new_path = path[0:-1]
+    new_path = path[:-1]
     s1, s2 = self.read_path(new_path, head[2])
     return seq1 + s1, seq2 + s2
 #-----------------------------------------------------------------------------
-  def dynamic_programming(self, filename: str, mode: str = 'a', debug=False, display=True):
+  def write(self, filename: str, mode: str = 'a', debug=False, display=True):
     paths = self.traceback(debug)
+
     if debug:
         print("\npaths")
-    outputs = []
-    for path in paths:
-      outputs.append(self.read_path(path, 'start'))
-      if debug:
-        print(path)
+        for path in paths:
+          print(path)
+
+    outputs = [self.read_path(path, 'start') for path in paths]
 
     with open(filename, mode) as file:
       for i, output in enumerate(outputs):
