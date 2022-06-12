@@ -37,15 +37,15 @@
 #------------------------------------------------------------------------------
 #CODE
 #------------------------------------------------------------------------------
-class PointedSet(object): 
+class PointedSet: 
 #------------------------------------------------------------------------------
-  def __init__(self,symbols,index):
-    self.symbols = symbols
-    if not(index in range(len(self.symbols))):
+  def __init__(self, symbols, index: int):
+    if index < 0 or index >= len(symbols):
       self.index = 0
-      self.symbols = ['*'] + self.symbols
+      self.symbols = ['*'] + symbols
     else:
       self.index = index
+      self.symbols = symbols
 #------------------------------------------------------------------------------
   def point(self):
     return self.symbols[self.index]
