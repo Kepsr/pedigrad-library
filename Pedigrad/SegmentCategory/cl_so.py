@@ -45,7 +45,6 @@
 
 >>> Method: .__init__
   [Actions]
-    .level    <- use()
     .domain   <- use(domain)
     .topology <- use(topology)
     .colors   <- use(colors)
@@ -98,7 +97,6 @@ class SegmentObject:
 #------------------------------------------------------------------------------
   def __init__(self, domain: int, topology: list[list[int]], colors: list):
     assert len(colors) == len(topology), "lengths do not match"
-    self.level = 0
     self.domain = domain
     self.topology = topology
     self.colors = colors
