@@ -26,7 +26,6 @@
 
 >>> Method: .__init__
   [Actions]
-    .level    <- use()
     .source   <- use(source)
     .target   <- use(target)
     .defined  <- use()
@@ -51,9 +50,7 @@ from Pedigrad.SegmentCategory.cl_so import SegmentObject
 class MorphismOfSegments:
 #------------------------------------------------------------------------------
   def __init__(self, source: SegmentObject, target: SegmentObject, f1: list[int], geq):
-    assert source.level == target.level == 0
     assert type(source) is type(target) is SegmentObject
-    self.level = 1
     self.source = source
     self.target = target
     self.f0 = []
