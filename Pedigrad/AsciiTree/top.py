@@ -27,18 +27,15 @@ from Pedigrad.PartitionCategory.cl_mop import MorphismOfPartitions
 def tree_of_partitions(partitions):
   #The tree cannot exist if there is no morphism arising from the input list,
   #which means that the list should contain, at least, a source and a target.
-  if len(partitions) < 2:
-    print("Error: in tree_of_partitions: list is empty")
-    exit()
-  else:
-    #A space is allocated in the memory to store the data of the tree.
-    the_tree = list()
-    for i in range(len(partitions)-1):
-      #The first element of the list is always the target of the tree structure
-      #while its source is the last element of the tree. This gives the direction
-      #in which the morphism needs to be oriented.
-      the_tree.append(MorphismOfPartitions(partitions[i+1],partitions[i]))
-    return the_tree
-  
+  assert len(partitions) >= 2, "list is empty"
 
-
+  #A space is allocated in the memory to store the data of the tree.
+  the_tree = []
+  for i, item in enumerate(partitions):
+    #The first element of the list is always the target of the tree structure
+    #while its source is the last element of the tree. This gives the direction
+    #in which the morphism needs to be oriented.
+    if i == len(partitions) - 1:
+      break
+    the_tree.append(MorphismOfPartitions(partitions[i+1], partitions[i]))
+  return the_tree
