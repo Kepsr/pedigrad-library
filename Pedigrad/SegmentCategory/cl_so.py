@@ -134,11 +134,12 @@ class SegmentObject:
     #How to display segments with a long masked start patch
     i = self.topology[0][0]
     if i < self.domain: #Should happen
-      yield 'o-' + str(i - 1) + '-o' if i > 10 else \
-            'o' * i
+      n = i - 1
+      yield f'o-{n}-o' if n > 9 else 'o' * i
     else: #Special case where the whole segment is masked
-      yield 'o-' + str(self.domain - 2) + '-o' if self.domain > 11 else \
-            'o' * self.domain  #Bottleneck case w/t the normal case
+      n = self.domain - 2
+      yield f'o-{n}-o' if n > 9 else 'o' * self.domain  
+      #Bottleneck case w/t the normal case
     if 0 < i < self.domain:
       yield '|'
 
@@ -163,10 +164,9 @@ class SegmentObject:
       i += 1
 
     #How to display segments with a long masked end patch
-    if self.domain - self.topology[-1][1] - 1 > 11:
-      yield '|o-' + str(self.domain - self.topology[-1][1] - 3) + '-o'
-    else:
-      yield '|' + 'o' * (self.domain - self.topology[-1][1] - 1)
+    yield '|'
+    n = self.domain - self.topology[-1][1] - 1
+    yield f'o-{n - 2}-o' if n > 11 else 'o' * n
 
     self.parse = saved_parse
     yield ')'
