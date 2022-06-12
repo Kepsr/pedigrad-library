@@ -1,13 +1,9 @@
 #------------------------------------------------------------------------------
 #print_partition(partition): standard output
 #------------------------------------------------------------------------------
-'''
-This function takes a list of elements and print its preimage on the standard output (console).
-
-'''
 from .piop import _preimage_of_partition
 
-def print_partition(partition):
+def print_partition(partition: list):
+  ''' Print the preimage of a list.
+  '''
   print(_preimage_of_partition(partition))
-
-

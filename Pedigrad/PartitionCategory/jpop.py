@@ -65,58 +65,46 @@ from .iop import _image_of_partition
 
 FAST = True
 
-def _join_preimages_of_partitions(preimage1,preimage2,speed_mode):
+def _join_preimages_of_partitions(preimage1: list, preimage2: list, speed_mode: bool):
+  # NOTE
+  # Herein we modify lists while iterating over them. 
+  # This can go horribly wrong.
+
   #Spaces are allocated in the memory so that the lists saved at the addresses
   #of the variables 'preimage1' and 'preimage2' are not modified. 
-  tmp1 = list()
-  tmp2 = list()
+  tmp1 = [_image_of_partition(x) for x in preimage1]
+  tmp2 = [_image_of_partition(x) for x in preimage2]
   #In addition, repetitions that may occur in each internal list of the 
   #two inputs are eliminated: e.g. [7,1,3,4,7] --> [7,1,3,4]
-  for i in range(len(preimage1)):
-    tmp1.append(_image_of_partition(preimage1[i]))
-  for i in range(len(preimage2)):
-    tmp2.append(_image_of_partition(preimage2[i]))
   #Reads preimage1;
-  for i1 in range(len(tmp1)):
-    #Reads in the i1-th internal lists of preimage1;
-    for j1 in range(len(tmp1[i1])):
+  for internal_list1 in tmp1:
+    #Reads in the internal lists of preimage1;
+    for x1 in internal_list1:
       #Reads preimage2;
-      for i2 in range(len(tmp2)):
-        #The variable flag indicates whether the value tmp1[i1][j1]
-        #has been found in one of the internal lists of preimage2;
-        flag = False
-        #Reads in the i2-th internal lists of preimage2.
-        for j2 in range(len(tmp2[i2])):
-          #The j1-th element of the i1-th internal list of preimage1
-          #is found in preimage2, specifically at position j2 
-          #of the i2-th internal list.
-          if tmp1[i1][j1] == tmp2[i2][j2]:
-            #The i2-th internal lists of preimage2 is appended
-            #to the i1-th internal lists of preimage1.
-            tmp1[i1].extend(tmp2[i2])
-            #The i2-th internal lists of preimage2 is emptied.
-            tmp2[i2]=[]
-            #Repeated elements occuring in the union of the two internal 
-            #lists, in preimage1, are eliminated.
-            tmp1[i1] = _image_of_partition(tmp1[i1])
-            #the variable flag indicates whether the j1-th element of  
-            #the i1-th internal list of preimage1 was found in preimage2.
-            flag = True
+      for internal_list2 in tmp2:
+        #Reads in the internal lists of preimage2.
+        for x2 in internal_list2:
+          if x1 == x2:
+            # If the value x1 (from an internal list of preimage1)
+            # is found in an internal list of preimage2:
+            # The internal list of preimage1 is extended by
+            # the internal list of preimage2
+            internal_list1.extend(internal_list2)
+            # The internal list of preimage2 is emptied
+            internal_list2 = []
+            # Repeated elements occuring in the union of the two internal lists, in preimage1,
+            # are eliminated.
+            internal_list1 = _image_of_partition(internal_list1)
             break
-        #tmp1[i1][j1] no longer needs to be searched in preimage2.
-        if speed_mode == FAST and flag == True:
-          break
+        else: 
+          # x1 no longer needs to be sought in preimage2.
+          if speed_mode == FAST:
+            break
     #On the one hand, the union of the first internal list of preimage1 
     #with all the other internal lists of preimage2 that intersect 
     #it is appended to preimage2.
-    tmp2.append(tmp1[i1])
+    tmp2.append(internal_list1)
     #On the other hand, this union is emptied in preimage1.
-    tmp1[i1] = []
-  #A space is allocated for the output of the procedure.
-  the_join = list()
-  #Only includes the non-empty lists of preimage2 in the output.
-  for i in range(len(tmp2)):
-    if tmp2[i]!=[]:
-      the_join.append(tmp2[i])
-  #The output contains the non-empty lists of preimage2.
-  return the_join
+    internal_list1 = []
+  # Return the non-empty lists of preimage2
+  return [x for x in tmp2 if x]
