@@ -119,11 +119,12 @@ class Environment:
       if len(check_length) == 1:
         schema = [check_length[0], color]
         indexing.append([schema, True])
-        add_to(schema, record)
+        if schema not in record:
+          record.append(schema)
       else:
         indexing.append([[], False])
-    base = [self.Seg.initial(*x) for x in record]
-    database = [[] for _ in record]
+    base = [self.Seg.initial(*schema) for schema in record]
+    database = [[] for schema in record]
     assert len(group_labels) == len(indexing) == len(alignments)
     for (x, y), alignment in zip(indexing, alignments):
       if y:
