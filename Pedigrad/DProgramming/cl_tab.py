@@ -2,26 +2,26 @@
 #Table (Class) | 3 objects | 9 methods
 #------------------------------------------------------------------------------
 '''
-[Objects] 
+[Objects]
   .name [Type] type
 
-[Methods] 
+[Methods]
   .name
         [Inputs: ]
           - name [Type] type
         [Outputs: ]
           - name [Type] type
-           
-[General description] 
+
+[General description]
   This structure models the features of a score table for the purpose of Dynamic programming. In particular, it encodes the dynamic programming algorithm required to be able to do the type of analysis discussed in CTGI for mechanism recognition.
-    
+
 >>> Method: .name
 
-  [Actions] 
+  [Actions]
     .object  <- use(class & arg)
     .output <- use(class & arg)
-  
-  [Description] 
+
+  [Description]
     This method
 
 
@@ -57,7 +57,7 @@ class Table:
   def incidence(self):
     for i, x in enumerate(self.seq1.seq):
       for j, y in enumerate(self.seq2.seq):
-        self.content[i+2][j+2] = 1 if x == y else 0
+        self.content[i+2][j+2] = int(x == y)
 #-----------------------------------------------------------------------------
   def fillout(self):
     for i, x in enumerate(self.seq1.seq):
@@ -65,7 +65,7 @@ class Table:
         self.content[i+2][j+2] = max(
           self.content[i+2][j+2] + self.content[i+1][j+1] if x == y else
           self.content[i+2][j+2],
-          self.content[i+2][j+1], 
+          self.content[i+2][j+1],
           self.content[i+1][j+2]
         )
 #-----------------------------------------------------------------------------
@@ -76,7 +76,7 @@ class Table:
       # diagonal
       if self.seq1.seq[i] == self.seq2.seq[j] and self.content[i+2][j+2] == m:
         choices.append([i-1, j-1, 'd'])
-      # vertical and horizontal   
+      # vertical and horizontal
       if self.content[i+2][j+1] == m:
         choices.append([i, j-1, 'h'])
       if self.content[i+1][j+2] == m:
@@ -86,7 +86,7 @@ class Table:
     if j == -1 and 0 <= i < len(self.seq1.seq):
       choices.append([i-1, j, 'v'])
     return choices
-#-----------------------------------------------------------------------------        
+#-----------------------------------------------------------------------------
   def tree(self, i: int, j: int, move):
     choices = self.choices(i, j)
     if not choices:
@@ -98,12 +98,12 @@ class Table:
     return Tree([s1, s2, move], children)
 #-----------------------------------------------------------------------------
   def traceback(self, debug: bool):
-    tree = self.tree(len(self.seq1.seq) - 1, len(self.seq2.seq) - 1, 'end')   
+    tree = self.tree(len(self.seq1.seq) - 1, len(self.seq2.seq) - 1, 'end')
     if debug:
       print("\ntree")
       tree.stdout()
     return tree.paths()
-#-----------------------------------------------------------------------------    
+#-----------------------------------------------------------------------------
   def read_path(self, path: str, move: str):
     if not path:
       return [], []
@@ -143,17 +143,17 @@ class Table:
         n2 = f'>{i}:{self.seq2.name}:{self.seq2.color}'
         s2 = ''.join(y)
         for line in [n1, s1, n2, s2]:
-          file.write(line + '\n')  
+          file.write(line + '\n')
         if display:
           for line in [n1, s1, n2, s2]:
             sys.stdout.write(line + '\n')
 
     return outputs
-#----------------------------------------------------------------------------- 
+#-----------------------------------------------------------------------------
   def stdout(self):
     for x in self.content:
       for y in x:
-        sys.stdout.write(str(y) + " | ")  
+        sys.stdout.write(str(y) + " | ")
       sys.stdout.write('\n')
       sys.stdout.flush()
 #-----------------------------------------------------------------------------

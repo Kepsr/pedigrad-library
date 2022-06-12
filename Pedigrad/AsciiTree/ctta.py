@@ -64,32 +64,22 @@ from Pedigrad.PartitionCategory.piop import _preimage_of_partition
 def convert_tree_to_atpf(tree):
   #The highest level in the atpf grammar (i.e. the leaves) is computed
   #by computing the preimage of the last source given in the input list.
-  the_atpf =_preimage_of_partition(tree[len(tree)-1].source)
-  for i in range(len(the_atpf)):
-    the_atpf[i]=(len(the_atpf[i]),the_atpf[i])
+  the_atpf = [(len(x), x) for x in _preimage_of_partition(tree[-1].source)]
   #To compute of the next levels of the atpf grammar (i.e. the trees)
   #one needs to compute the fibers of the morphisms contained in 
   #the input list (i.e tree).
-  for k in range(len(tree)):
-    fiber = _preimage_of_partition(tree[len(tree)-1-k].arrow)
-    for i in range(len(fiber)):
-      for j in range(len(fiber[i])):
-        #The next line replaces the fibers with the backeting induced by the atpf.
-        #The bracketing of the fiber is preserved, so that the level of the 
-        #bracketing contained in the atpf is increased.
-        fiber[i][j] = the_atpf[fiber[i][j]]
+  for i, _ in enumerate(tree):
+    # Replaces the fibers with the backeting induced by the atpf.
+    # The bracketing of the fiber is preserved, so that the level of the 
+    # bracketing contained in the atpf is increased.
+    fiber = [the_atpf[g] for g in _preimage_of_partition(tree[-1-i].arrow)]
     #Computes the weight of each tree.
-    for i in range(len(fiber)):
-      weight = 0
-      for t in fiber[i]:
-        weight = weight + t[0]
-      fiber[i] = (weight,fiber[i])
+    for i, x in enumerate(fiber):
+      weight = sum(t[0] for t in x)
+      fiber[i] = (weight, x)
     #The construction of the grammar is completed in the following line.
     #The procedure repeats the previous construction until it reaches the 
     #first morphism of the input list.
     the_atpf = fiber
   #The depth of the atpf is equal to len(tree)+1.
-  return (the_atpf,len(tree)+1)
-
-
-
+  return (the_atpf, len(tree) + 1)

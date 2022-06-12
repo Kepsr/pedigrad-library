@@ -24,42 +24,39 @@ A   C   D...E   F   B
 
 import sys
 
-def print_atf(atf,depth):
+def print_atf(atf: list, depth: int):
   #If depth = 0 then the program terminates and the tree is printed 
   #on the standard output.
-  if depth != 0 :
-    for j in range(len(atf)):
-      sys.stdout.write("|   ")
-      for i in range(atf[j][0][0]-1):
+  if depth == 0:
+    return
+
+  for x in atf:
+    sys.stdout.write("|   ")
+    for _ in range(x[0][0] - 1):
+      sys.stdout.write("    ")
+  sys.stdout.write("\n")
+  sys.stdout.flush()
+  for x in atf:
+    #Prints branches for intermediate levels.
+    if depth != 1:
+      sys.stdout.write("|")
+    #Prints the label of the leaves.
+    else:
+      for k, ktem in enumerate(x[1]):
+        if k > 0:
+          sys.stdout.write("...")
+        sys.stdout.write(chr(65 + ktem))
+    for _ in range(x[0][1]):
+      sys.stdout.write("____")
+    #Prints spaces between the branches of intermediate levels.
+    if depth != 1:
+      for _ in range(x[0][0] - x[0][1] - 1):
         sys.stdout.write("    ")
-    sys.stdout.write("\n")
-    sys.stdout.flush()
-    for j in range(len(atf)):
-      #Prints branches for intermediate levels.
-      if depth != 1:
-        sys.stdout.write("|")
-      #Prints the label of the leaves.
-      else:
-        for k in range(len(atf[j][1])):
-          if k > 0:
-            sys.stdout.write("...")
-          sys.stdout.write(chr(65+atf[j][1][k]))
-      for i in range(atf[j][0][1]):
-        sys.stdout.write("____")
-      #Prints spaces between the branches of intermediate levels.
-      if depth != 1:
-        for i in range(atf[j][0][0]-atf[j][0][1]-1):
-          sys.stdout.write("    ")
-      sys.stdout.write("   ")
-    sys.stdout.write("\n")
-    sys.stdout.flush()
-    next_atf = list()
-    for i in range(len(atf)):
-      #Truncates the atf from below so that 
-      #the next level of the atf is turned into a forest.
-      next_atf = next_atf + atf[i][1]
-    #Recursion step: continues to the next line on the standard output.
-    print_atf(next_atf, depth-1)
-
-
-
+    sys.stdout.write("   ")
+  sys.stdout.write("\n")
+  sys.stdout.flush()
+  #Truncates the atf from below so that 
+  #the next level of the atf is turned into a forest.
+  next_atf = sum((x[1] for x in atf), [])
+  #Recursion step: continues to the next line on the standard output.
+  print_atf(next_atf, depth - 1)
