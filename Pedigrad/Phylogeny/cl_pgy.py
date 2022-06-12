@@ -273,7 +273,7 @@ class Phylogeny:
     #of partitions between two given lists (seen as partitions).
     def homset(partition1,partition2):
         try:
-          MorphismOfPartitions(partition1,partition2,False)
+          MorphismOfPartitions(partition1, partition2)
           return True
         except:
           return False

@@ -35,7 +35,6 @@ def tree_of_partitions(partitions):
     #The first element of the list is always the target of the tree structure
     #while its source is the last element of the tree. This gives the direction
     #in which the morphism needs to be oriented.
-    if i == len(partitions) - 1:
-      break
-    the_tree.append(MorphismOfPartitions(partitions[i+1], partitions[i]))
+    if i != len(partitions) - 1:
+      the_tree.append(MorphismOfPartitions(partitions[i+1], partitions[i]))
   return the_tree

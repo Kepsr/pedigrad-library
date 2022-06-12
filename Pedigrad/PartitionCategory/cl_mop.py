@@ -1,12 +1,9 @@
-#------------------------------------------------------------------------------
-#MorphismOfPartitions: .arrow, .source, .target
-#------------------------------------------------------------------------------
 '''
 This class possesses three objects, namely
 - .arrow (list)
 - .source (list)
 - .target (list)
-and a constructor .__init__. The consructor .__init__ takes two lists as well as an optional argument and stores, in the object .arrow, the list that describes, if it exists, the (unique) morphism of partitions from the first input list (seen as a partition) to the second input list (seen as a partition). If the morphism does not exist, then the method returns an error message unless the value False was given as an input in the third argument.
+and a constructor .__init__.
 
 The canonical epimorphisms associated with the partitions of the first and second input lists are stored in the objects .source and .target, respectively.
 
@@ -39,37 +36,37 @@ from Pedigrad.PartitionCategory.efp import _epi_factorize_partition
 from Pedigrad.PartitionCategory.iop import _image_of_partition
 
 class MorphismOfPartitions:
-  #The objects of the class are:
-  #.arrow (list);
-  #.source (list);
-  #.target (list).
-  def __init__(self, source: list, target: list, *args):
-    if len(source) == len(target):
-      #Relabeling the source and target by using _epi_factorize_partition
-      #will allow us to quickly know whether there is an arrow from the source
-      #and the target (see below).
-      self.source = _epi_factorize_partition(source)
-      self.target = _epi_factorize_partition(target)
-      #The following line computes the binary relation that is supposed to 
-      #encode the function from the codomain of the underlying
-      #epimorphism encoding the source partition to the codomain of the
-      #epimorphsim encoding the target partition.
-      self.arrow = _image_of_partition(zip(self.source,self.target))
+
+  def __init__(self, source: list, target: list):
+    '''
+    Set the attribute `arrow` to the list that describes, if it exists,
+    the (unique) morphism of partitions
+    from the `source` (seen as a partition)
+    to `target` (seen as a partition).
+    If no such morphism exists, an exception is raised.
+    '''
+    assert len(source) == len(target)
+    #Relabeling the source and target by using _epi_factorize_partition
+    #will allow us to quickly know whether there is an arrow from the source
+    #and the target (see below).
+    self.source = _epi_factorize_partition(source)
+    self.target = _epi_factorize_partition(target)
+    #The following line computes the binary relation that is supposed to 
+    #encode the function from the codomain of the underlying
+    #epimorphism encoding the source partition to the codomain of the
+    #epimorphsim encoding the target partition.
+    self.arrow = _image_of_partition(zip(self.source,self.target))
     #The following loop checks if the binary relation contained 
     #in self.arrow is a function.
-    for i, x in enumerate(self.arrow):
+    for i, (x, y) in enumerate(self.arrow):
       #Checking the following condition is equivalent to checking
       #whether the label i in self.source is mapped to a unique element in 
       #self.target, namely the value contained in self.arrow[i][1].
       #Note that: the mapping might not be unique when the indexing of 
       #the labels of the source partition is not compatible with that
       #of the target partition.
-      if x[0] == i:
+      if x == i:
         # We are only interested in the image (not the graph) of the function.
-        x = x[1]
+        self.arrow[i] = y
       else:
-        if len(args) > 0 and not args[0]:
-          exit()
-        else:
-          print("Error: in MorphismOfPartitions.__init__: source and target are not compatible.")
-          exit()
+        raise Exception("Source and target are not compatible.")
