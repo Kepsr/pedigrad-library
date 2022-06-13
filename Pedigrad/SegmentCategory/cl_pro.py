@@ -42,14 +42,9 @@
           - element2  [Type] 'a
         [Outputs: 1]
           - infimum   [Type] 'a
-  .presence
-        [Inputs: 1]
-          - element   [Type] 'a
-        [Outputs: 1]
-          - presence  [Type] bool
 
 [General description]
-  This class models the features of a pre-ordered set. The pre-order relations are specified through either a file [filename] or another PreOrder item passed to the constructor [__init__]. The method [closure] computes the transitive closure of the pre-order relations stored in the object [relations]; the method [geq] returns a Boolean value specifying whether there is a pre-order relation between two given elements of the pre-ordered set; the method [inf] returns the infimum of two elements of the pre-ordered set; and the method [presence] returns a Boolean value specifying whether an element belongs to the pre-ordered set.
+  This class models the features of a pre-ordered set. The pre-order relations are specified through either a file [filename] or another PreOrder item passed to the constructor [__init__]. The method [closure] computes the transitive closure of the pre-order relations stored in the object [relations]; the method [geq] returns a Boolean value specifying whether there is a pre-order relation between two given elements of the pre-ordered set; the method [inf] returns the infimum of two elements of the pre-ordered set; and the method __contains__ returns a Boolean value specifying whether an element belongs to the pre-ordered set.
 
 >>> Method: .__init__
   [Actions]
@@ -92,11 +87,6 @@
   [Description]
     Cartesian version of the method [_inf].
 
->>> Method: .presence
-  [Actions]
-    presence <- use(self.relations)
-  [Description]
-    Specifies whether [element] belongs to the pre-ordered set.
 '''
 #------------------------------------------------------------------------------
 #Global variables
@@ -274,6 +264,8 @@ class PreOrder:
       for i in range(self.cartesian)
     ]
 #------------------------------------------------------------------------------
-  def presence(self, element):
+  def __contains__(self, element) -> bool:
+    ''' Does `element` belong to this pre-ordered set?
+    '''
     return any(element == relation[0] for relation in self.relations)
 #------------------------------------------------------------------------------
