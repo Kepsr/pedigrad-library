@@ -72,9 +72,9 @@ class Environment:
     self.pset = pset
     self.spec = exponent
     self.b = threshold
-    for i in range(len(self.b)):
-      if not self.Seg.preorder.presence(self.b[i]):
-        self.b[i] = self.Seg.preorder.mask
+    for i, x in enumerate(threshold):
+      if x not in self.Seg.preorder:
+        threshold[i] = self.Seg.preorder.mask
     for i in range(len(self.b), self.spec):
       self.b.append(self.Seg.preorder.mask)
 #------------------------------------------------------------------------------
