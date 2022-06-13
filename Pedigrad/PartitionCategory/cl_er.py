@@ -42,7 +42,7 @@ eq2.quotient() = [1, 1, 1, 0, 2, 3, 4, 0, 0, 1, 5, 6, 7, 8, 9, 1, 10, 11, 12]
 '''
 
 from .jpop import _join_preimages_of_partitions, FAST
-from Pedigrad.Useful.usf import is_index
+from Pedigrad.utils import is_index
 
 class EquivalenceRelation:
   #The objects of the class are:

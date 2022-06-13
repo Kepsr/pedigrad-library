@@ -57,8 +57,6 @@
     Returns the hom-set associated with the pair of objects ([source],[target]).
 '''
 #------------------------------------------------------------------------------
-#Dependencies: current, Useful
-#------------------------------------------------------------------------------
 from .cl_pro import PreOrder
 from .cl_so import SegmentObject
 from .cl_mos import MorphismOfSegments

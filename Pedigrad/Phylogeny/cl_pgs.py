@@ -27,7 +27,7 @@ The method .print_tree() returns the evolutionary tree describing the sequence o
 
 from Pedigrad.PartitionCategory.cl_er import EquivalenceRelation
 from Pedigrad.AsciiTree.pet import print_evolutionary_tree
-from Pedigrad.Useful.usf import is_index
+from Pedigrad.utils import is_index
 
 class Phylogenesis:
   #The objects of the class are:
