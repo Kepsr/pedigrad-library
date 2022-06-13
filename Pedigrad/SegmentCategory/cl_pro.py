@@ -88,22 +88,15 @@
     Cartesian version of the method [_inf].
 
 '''
-#------------------------------------------------------------------------------
-#Global variables
-#------------------------------------------------------------------------------
-'''
-The list _ascii_for_text defined below specifies the characters that can be used
-as a variable name for the elements of the pre-ordered set.
-ASCII code 33: !
-ASCII code between 48 to 57 : [0-9]
-ASCII code 64 : @
-ASCII code between 65 to 90 : [A-Z]
-ASCII code 95 : _
-ASCII code between 97 to 122 : [a-z]
-'''
-heading_separators = list(range(0,33)) + list(range(34,48)) + list(range(58,64)) + list(range(91,95)) + [96] + list(range(123,256))
 
-heading_separators = [chr(sep) for sep in heading_separators]
+# Characters that cannot be used to name an element of a pre-ordered set
+heading_separators = [
+  # 8-bit ASCII
+  sep for sep in map(chr, range(256)) if sep not in '_@!'
+    + '0123456789'
+    + 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    + 'abcdefghijklmnopqrstuvwxyz'
+]
 
 separators = heading_separators + ['!']
 #------------------------------------------------------------------------------
