@@ -103,7 +103,7 @@ class CategoryOfSegments:
     and    segment1.colors   == segment2.colors
 #------------------------------------------------------------------------------
   @staticmethod
-  def initial(domain: int, color: list):
+  def initial(domain: int, color: str):
     return SegmentObject(
       domain,
       topology=[(i, i) for i in range(domain)],

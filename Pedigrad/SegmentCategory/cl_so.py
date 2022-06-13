@@ -95,7 +95,7 @@
 #------------------------------------------------------------------------------
 class SegmentObject:
 #------------------------------------------------------------------------------
-  def __init__(self, domain: int, topology: list[list[int]], colors: list):
+  def __init__(self, domain: int, topology: list[list[int]], colors: list[str]):
     assert len(colors) == len(topology), "lengths do not match"
     self.domain = domain
     self.topology = topology
