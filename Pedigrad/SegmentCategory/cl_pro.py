@@ -117,9 +117,7 @@ heading_separators = [chr(sep) for sep in heading_separators]
 
 separators = heading_separators + ['!']
 #------------------------------------------------------------------------------
-#Dependencies: current, Useful
-#------------------------------------------------------------------------------
-from Pedigrad.Useful.usf import usf, add_to
+from Pedigrad.utils import read_until
 from functools import reduce
 #------------------------------------------------------------------------------
 #CODE
@@ -142,12 +140,12 @@ class PreOrder:
 
     self = PreOrder(relations=[], transitive=False, mask=False, cartesian=cartesian)
 
-    with open(filename, "r") as file:
+    with open(filename, 'r') as file:
 
       # Search the key words '!obj:' or 'obj:'
       list_of_objects = []
       while True:
-        heading = usf.read_until(file, heading_separators, [':'])
+        heading = read_until(file, heading_separators, [':'])
         if not heading:
           raise Exception(f"\'obj:\' was not found im {filename}")
         if heading[-1] == "!obj":
@@ -159,7 +157,7 @@ class PreOrder:
       # Search the key word 'rel:'
       found_rel = False
       while not found_rel:
-        tokens = usf.read_until(file, separators, ['#', ':'], inclusive=True)
+        tokens = read_until(file, separators, ['#', ':'], inclusive=True)
         if tokens == ['']:
           break
         if tokens[-2:] == ["rel", ":"]:
@@ -167,13 +165,15 @@ class PreOrder:
           found_rel = True
         else:
           objects = tokens[:-1]
-          usf.read_until(file, separators, ['\n'])
+          read_until(file, separators, ['\n'])
 
         # Construct [list_of_objects] and [self.relations]
         for obj in objects:
           # assert obj in list_of_objects == [obj] in self.relations
-          add_to(obj, list_of_objects)
-          add_to([obj], self.relations)
+          if obj not in list_of_objects:
+            list_of_objects.append(obj)
+          if [obj] not in self.relations:
+            self.relations.append([obj])
 
       if not found_rel:
         # If the key word 'rel:' is not found
@@ -183,17 +183,17 @@ class PreOrder:
       while True:
 
         while True:
-          tokens = usf.read_until(file, separators, ['#', '>'], inclusive=True)
+          tokens = read_until(file, separators, ['#', '>'], inclusive=True)
           successors = []
           if tokens == ['']:
             break
           successors = tokens[:-1]
           if tokens[-1] == ">":
             break
-          usf.read_until(file, separators, ['\n'])
+          read_until(file, separators, ['\n'])
 
         # Complete [self.relations] with [predecessors] for each successor
-        predecessors = usf.read_until(file, separators, [';'])
+        predecessors = read_until(file, separators, [';'])
         for successor in set(successors):
           try:
             i = list_of_objects.index(successor)

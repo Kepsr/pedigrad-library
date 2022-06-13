@@ -24,7 +24,7 @@
           - return [Type] SegmentObject('a)
   .seqali
         [Inputs: 1]
-          - name_of_file [Type] string
+          - filename [Type] string
         [Outputs: 1]
           - return [Type] SequenceAlignment
 
@@ -48,20 +48,20 @@
 
 >>> Method: .seqali
   [Actions]
-    .return  <- use(name_of_file,usf.fasta,self.Seg,self.b)
+    .return  <- use(filename,fasta,self.Seg,self.b)
   [Description]
     This method constructs a sequence aligment functor from a file of sequence alignments, as shown in the development of Example 3.22 of CTGI.
 
 '''
 #------------------------------------------------------------------------------
-#Dependencies: current, SegmentCategory, Useful
+#Dependencies: current, SegmentCategory
 #------------------------------------------------------------------------------
 from .cl_sal import SequenceAlignment
 
 from Pedigrad.SegmentCategory.cl_so import SegmentObject
 from Pedigrad.SegmentCategory.cl_cos import CategoryOfSegments
 
-from Pedigrad.Useful.usf import usf, add_to
+from Pedigrad.utils import fasta
 #------------------------------------------------------------------------------
 #CODE
 #------------------------------------------------------------------------------
@@ -78,24 +78,24 @@ class Environment:
     for i in range(len(self.b), self.spec):
       self.b.append(self.Seg.preorder.mask)
 #------------------------------------------------------------------------------
-  def segment(self, a_list, color):
+  def segment(self, a_list: list, color: list):
     removal = [i for i, item in enumerate(a_list) if item not in self.pset.symbols]
     return self.Seg.initial(len(a_list), color).remove(removal, 'nodes-given')
 #------------------------------------------------------------------------------
-  def seqali(self,name_of_file):
+  def seqali(self, filename: str):
+
     group_labels = []
     indiv = []
-    names,sequences = usf.fasta(name_of_file)
+    names, sequences = fasta(filename)
     for name in names:
       x, y, *_ = name
-      add_to(x, group_labels)
-      add_to(y, indiv)
-    if len(indiv) > len(self.b):
-      print("Error in Environment.seqali: "+name_of_file+" contains more individuals than the number specified in the environment.")
-      exit()
-    if len(indiv) < len(self.b):
-      print("Error in Environment.seqali: "+name_of_file+" contains fewer individuals than the number specified in the environment.")
-      exit()
+      if x not in group_labels:
+        group_labels.append(x)
+      if y not in indiv:
+        indiv.append(y)
+
+    assert len(indiv) <= len(self.b), f"Error in Environment.seqali: {filename} contains more individuals than the number specified in the environment."
+    assert len(indiv) >= len(self.b), f"Error in Environment.seqali: {filename} contains fewer individuals than the number specified in the environment."
 
     group_colors = []
     alignments = []
@@ -108,10 +108,16 @@ class Environment:
       gl, ind, x = name
       gli = group_labels.index(gl)
       indi = indiv.index(ind)
+      group_color = group_colors[gli]
+      alignment = alignments[gli]
+      check_length = check_lengths[gli]
       if self.Seg.preorder.geq(x, self.b[indi]) or self.b[indi] == True:
-        group_colors[gli][indi] = x
-        alignments[gli][indi] = sequences[i]
-        add_to(len(alignments[gli][indi]), check_lengths[gli])
+        group_color[indi] = x
+        alignment[indi] = sequences[i]
+        n = len(alignment[indi])
+        if n not in check_length:
+          check_length.append(n)
+
     record = []
     indexing = []
     assert len(group_labels) == len(check_lengths) == len(group_colors)
@@ -123,11 +129,11 @@ class Environment:
           record.append(schema)
       else:
         indexing.append([[], False])
+
+    assert len(group_labels) == len(indexing) == len(alignments)
     base = [self.Seg.initial(*schema) for schema in record]
     database = [[] for schema in record]
-    assert len(group_labels) == len(indexing) == len(alignments)
     for (x, y), alignment in zip(indexing, alignments):
       if y:
         database[record.index(x)].append(alignment)
     return SequenceAlignment(self, indiv, base, database)
-#------------------------------------------------------------------------------
