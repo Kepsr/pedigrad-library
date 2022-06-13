@@ -26,22 +26,14 @@ The method .print_tree() returns the evolutionary tree describing the sequence o
 '''
 
 from Pedigrad.PartitionCategory.cl_er import EquivalenceRelation
-
 from Pedigrad.AsciiTree.pet import print_evolutionary_tree
+from Pedigrad.Useful.usf import is_index
 
 class Phylogenesis:
   #The objects of the class are:
   #.taxon (non-negative integer)
   #.history (list of lists of indices);
   def __init__(self, history: list[list[int]]):
-    #The local function is_index allows us to check whether a variable contains
-    #a non-negative integer or not. It returns True if a non-negative integer
-    #is given.
-    def is_index(x):
-      try:
-        return int(x) == x and x >= 0
-      except:
-        return False
     #The following lines check that the lists contained in the variable
     #history is non-empty and its first list is a singleton. If this is case,
     #it allocates the value contained in the first list to the object .taxon.

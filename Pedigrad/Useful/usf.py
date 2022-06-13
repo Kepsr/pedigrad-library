@@ -94,3 +94,11 @@ def add_to(element, a_list: list):
   '''
   if element not in a_list:
     a_list.append(element)
+
+def is_index(x):
+  ''' Is `x` a non-negative integer?
+  '''
+  try:
+    return int(x) == x and x >= 0
+  except:
+    return False
