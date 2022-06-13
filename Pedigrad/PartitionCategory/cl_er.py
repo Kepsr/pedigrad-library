@@ -42,6 +42,7 @@ eq2.quotient() = [1, 1, 1, 0, 2, 3, 4, 0, 0, 1, 5, 6, 7, 8, 9, 1, 10, 11, 12]
 '''
 
 from .jpop import _join_preimages_of_partitions, FAST
+from Pedigrad.Useful.usf import is_index
 
 class EquivalenceRelation:
   #The objects of the class are:
@@ -49,69 +50,46 @@ class EquivalenceRelation:
   #. range (integer);
   #The following constructor takes between 1 and 2 arguments,
   #the first one being a list and the second being an integer.
-  def __init__(self, *args):
-    #The local function is_index allows us to check whether a variable contains
-    #a non-negative integer or not. It returns True if a non-negative integer
-    #is given.
-    def is_index(x):
-      try:
-        return int(x) == x and x >= 0
-      except:
-        return False
-    #Checks that the number of arguments is correct.
-    assert len(args) in [1, 2], f"Error: in EquivalenceRelation.__init__: takes between 1 and 2 arguments ({len(args)} given)."
+  def __init__(self, classes: list[list[int]], m: int = -1):
 
-    #The variable 'elements' records the set of indices on which the
-    #the list of lists of indices given in a first input is defined.
-    elements = []
-    for i in range(len(args[0])):
-      for j in args[0][i]:
+    elements = set()  # The set of indices on which the classes is defined
+    for class_ in classes:
+      for j in class_:
         #The elements should be non-negative integers. If there are not, the
         #procedure outputs an error message and exits the program.
-        if not is_index(j):
-          print("Error: in EquivalenceRelation.__init__: the first input should be a list of lists of non-negative integers.")
-          exit()
+        assert is_index(j), "`classes` should be a list of lists of non-negative integers."
         #Elements that appear several times are only counted once.
-        elif not(j in elements):
-          elements.append(j)
+        elements.add(j)
     #The variable 'individuals' contains the number of distinct elements that
     #the first input contains.
-    if elements != []:
+    if elements:
       individuals = max(elements)
       #If a second input is given, the following lines check that it
       #is greater then or equal to the maximum index contained in
       #the first input.
-      if len(args) == 2:
-        if args[1] < individuals:
-          print("Error: in EquivalenceRelation.__init__: the given range is smaller than the maximum element of the given classes.")
-          exit()
-        else:
-          #If so, we want to assign the value of args[1] to the
-          #object .range. This is done by firs passing it 'individuals'
-          #and self.range (as shown below).
-          individuals = args[1]
+      if m > -1:
+        assert m >= individuals, "The given range is smaller than the maximum element of the given classes."
+        #If so, we want to assign the value of m to the
+        #object .range. This is done by firs passing it 'individuals'
+        #and self.range (as shown below).
+        individuals = m
       #The object range contains the cardinal of the set on which the
       #first input is defined while the object .classes stores the
       #list of lists given in the first input.
       self.range = individuals
-      self.classes = args[0]
+      self.classes = classes
     else:
-      if len(args) != 2:
-        print("Error: in EquivalenceRelation.__init__: the first argument is trivial; a second argument required.")
-        exit()
-      else:
-        if is_index(args[1]):
-          self.range = args[1]
-        else:
-          print("Error: in EquivalenceRelation.__init__: the second argument should be a non-negative integer.")
-          exit()
-        self.classes = [[i] for i in range(self.range + 1)]
+      assert m != -1, "`classes` is trivial: `m` is required."
+      assert is_index(m), "`m` should be a non-negative integer."
+      self.range = m
+      self.classes = [[i] for i in range(m + 1)]
 
-  #The following function replaces the content of the object .classes with
-  #the transitive closure of its classes. After this procedure, the object
-  #.classes describes an actually equivalence relation (modulo the singleton
-  #equivalence classes, which do not need to be specifid for obvious reasons).
   def closure(self):
+    '''
+    Set `self.classes` to the transitive closure of `self`'s classes.
+    After this procedure, `self.classes` describes an actual equivalence relation
+    (modulo the singleton equivalence classes, which do not need to be specifid for obvious reasons).
+    '''
     self.classes = _join_preimages_of_partitions(self.classes, self.classes, not FAST)
 
   def quotient(self):
@@ -125,22 +103,22 @@ class EquivalenceRelation:
     #Allocates spaces in the memory in order to allow the access
     #to the positions of the elements of the partition without
     #using the method .append (at the end of the procedure).
-    the_quotient = ["?" for _ in range(self.range + 1)]
+    q = ["?" for _ in range(self.range + 1)]
     #Now that the partition has the right number of allocated spaces in
     #the memory, we can fill it by using the positions instead of
     #appending elements.
     for i, js in enumerate(self.classes):
       for j in js:
         #The partition contains the integer i at the position y.
-        the_quotient[j] = i
+        q[j] = i
     #The following lines are meant to fill the missing images in.
     #The indices of these images corresponds to those indices that either
     #do not appear among the indices of the object .classes or belongs to
     #singleton classes in the object .classes. The quotient should therefore
     #give them images that are not shared with other indices.
     k = len(self.classes)
-    for x in the_quotient:
+    for x in q:
       if x == "?":
         x = k
         k += 1
-    return the_quotient
+    return q
