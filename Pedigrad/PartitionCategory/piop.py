@@ -19,8 +19,8 @@ def _preimage_of_partition(partition: list) -> list[list]:
   '''
   # Fill preimage with empty lists in order to store the fibers of the partition.
   preimage = [[] for _ in _image_of_partition(partition)]
-  # The number of fibers contained by the preimage is equal to the number
-  # of elements in the image of the partition.
+  # The number of fibers contained by the preimage is equal
+  # to the number of elements in the image of the partition.
   # The relabeled list of 'partition' gives the desired indexing
   # of the fibers contained in the preimage of partition.
   epimorphism = _epi_factorize_partition(partition)

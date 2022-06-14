@@ -13,9 +13,6 @@ from .jpop import _join_preimages_of_partitions
 from .jpop import FAST
 #FAST = True
 
-from .pp import print_partition
-#print_partition(partition): standard output
-
 from .cl_er import EquivalenceRelation
 #EquivalenceRelation: .classes, .range, .closure, .quotient
 
