@@ -17,3 +17,6 @@ class PointedSet:
     ''' Return the base point.
     '''
     return self.symbols[self.index]
+
+  def __contains__(self, x):
+    return x in self.symbols

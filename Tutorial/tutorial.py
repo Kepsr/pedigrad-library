@@ -2,17 +2,17 @@ import sys
 sys.path.insert(0, '../')
 
 from Pedigrad import (
-  PreOrder, SegmentObject, MorphismOfSegments,
+  Proset, SegmentObject, MorphismOfSegments,
   CategoryOfSegments, PointedSet, Environment,
   Sequence, Table
 )
 
 
-Omega = PreOrder.from_file("omega.yml")
+Omega = Proset.from_file("omega.yml")
 print(Omega.relations)
 print(Omega.mask)
 print(Omega.cartesian)
-Omega.closure()
+Omega.close()
 print("--after:")
 print(Omega.relations)
 print("--relation:")

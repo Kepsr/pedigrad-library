@@ -1,4 +1,4 @@
-from .cl_pro import PreOrder
+from .cl_pro import Proset
 
 from .cl_so import SegmentObject
 

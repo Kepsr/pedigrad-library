@@ -3,7 +3,7 @@ import Pedigrad.utils
 #----------------------------------------------------------------------------
 from .DProgramming import Tree, Sequence, Table
 #----------------------------------------------------------------------------
-from .SegmentCategory import PreOrder, SegmentObject, MorphismOfSegments, CategoryOfSegments
+from .SegmentCategory import Proset, SegmentObject, MorphismOfSegments, CategoryOfSegments
 #----------------------------------------------------------------------------
 from .AlignedFunctor import PointedSet, Environment, SequenceAlignment
 #----------------------------------------------------------------------------

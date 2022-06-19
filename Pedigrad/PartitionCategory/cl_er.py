@@ -1,13 +1,10 @@
-#------------------------------------------------------------------------------
-#EquivalenceRelation: .classes, .range, .closure, .quotient
-#------------------------------------------------------------------------------
 '''
 This class possesses two objects, namely
 - .classes (list of lists);
 - .range (integer);
 and three methods, namely
 - .__init__ (constructor);
-- .closure;
+- .close;
 - .quotient.
 
 The constructor .__init__ takes between 1 and 2 arguments: the first argument should either be an empty list or a list of lists of indices (i.e. non-negative integers) and the second argument, which is optional, should an integer that is greater than or equal to the maximum index contained in the first input.
@@ -27,11 +24,11 @@ eq3 = EquivalenceRelation([],5)
 eq3.classes = [[0], [1], [2], [3], [4], [5]]
 
 
-The method .closure replaces the content of the object .classes with the transitive closure of its classes. After this procedure, the object .classes describes an actually equivalence relation (modulo the singleton equivalence classes, which do not need to be specified for obvious reasons).
+The method .close replaces the content of the object .classes with the transitive closure of its classes. After this procedure, the object .classes describes an actually equivalence relation (modulo the singleton equivalence classes, which do not need to be specified for obvious reasons).
 
-eq1.closure()
+eq1.close()
 eq1.classes = [[7, 3, 8, 6], [4, 9, 5, 0, 1, 2]]
-eq2.closure()
+eq2.close()
 eq2.classes = [[7, 3, 8], [9, 15, 0, 1, 2]]
 
 The method .quotient() returns a list of integers whose length is equal to the integer stored in the object .range decreased by 1 and whose non-trivial fibers are those contained in the object .classes.
@@ -84,7 +81,7 @@ class EquivalenceRelation:
       self.range = m
       self.classes = [[i] for i in range(m + 1)]
 
-  def closure(self):
+  def close(self):
     '''
     Set `self.classes` to the transitive closure of `self`'s classes.
     After this procedure, `self.classes` describes an actual equivalence relation
@@ -97,7 +94,7 @@ class EquivalenceRelation:
     #do not define an equivalence relation. To prevent an ill-defined quotient,
     #the classes are turned into an actual equivalence relation by completing
     #.classes transitively.
-    self.closure()
+    self.close()
     #Allocates a space in the memory to store the partition associated
     #with the equivalence relation defined by self.classes.
     #Allocates spaces in the memory in order to allow the access
