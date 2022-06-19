@@ -34,7 +34,7 @@
 >>> Method: .__init__
   [Actions] 
     .env      <- use(env)
-    .Seg      <- use(PreOrder,CategoryOfSegments,self.env)
+    .Seg      <- use(Proset,CategoryOfSegments,self.env)
     .indiv    <- use(indiv)
     .base     <- use(base)
     .database <- use(database)
@@ -62,7 +62,7 @@
 #------------------------------------------------------------------------------
 #Dependencies: current, SegmentCategory
 #------------------------------------------------------------------------------
-from Pedigrad.SegmentCategory.cl_pro import PreOrder
+from Pedigrad.SegmentCategory.cl_pro import Proset
 from Pedigrad.SegmentCategory.cl_cos import CategoryOfSegments
 #------------------------------------------------------------------------------
 #CODE

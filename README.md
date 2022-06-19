@@ -18,7 +18,8 @@
 1. Put Pedigrad.py and Pedigad_py in location X
 2. Create your main file in location X, where Pedigrad.py and Pedigad_py are;
 3. Include the following line to your main file:
-```
+
+```python
     from Pedigrad import *
 ```
 4. Use the Pedigrad library (see documentation). 

@@ -1,3 +1,5 @@
+from Pedigrad.utils import read_until
+from functools import reduce
 
 # Characters that cannot be used to name an element of a pre-ordered set
 heading_separators = [
@@ -10,23 +12,17 @@ heading_separators = [
 
 separators = heading_separators + ['!']
 
-from Pedigrad.utils import read_until
-from functools import reduce
-
-
-class PreOrder:
+class Proset:
   '''
   This class models the features of a pre-ordered set.
   The pre-order relations are specified through either a file [filename] 
-  or another PreOrder item passed to the constructor [__init__].
-  The method [closure] computes the transitive closure of the pre-order relations
-  stored in the object [relations];
-  the method [geq] returns a Boolean value
-  specifying whether there is a pre-order relation
-  between two given elements of the pre-ordered set;
-  the method [inf] returns the infimum of two elements of the pre-ordered set;
-  and the method __contains__ returns a Boolean value
-  specifying whether an element belongs to the pre-ordered set.
+  or another `Proset` item passed to the constructor [__init__].
+
+  A preorder or quasiorder is a reflexive, transitive binary relation. 
+  Preorders are a general class of relation,
+  with specialisations like
+  equivalence relations (preorders with symmetry),
+  partial orders (preorders with antisymmetry).
   '''
 
   def __init__(
@@ -38,9 +34,14 @@ class PreOrder:
     self.mask = mask
     self.cartesian = cartesian
 
+    # `relations` (which encodes the pre-order relations) is a list containing,
+    # for every element of the pre-ordered set, an internal list starting with that element.
+    # Each such internal list contains all the elements
+    # of which its first element is a predecessor.
+
   def copy(self, cartesian: int):
     assert cartesian > 0
-    return PreOrder(self.relations, self.transitive, self.mask, cartesian)
+    return Proset(self.relations, self.transitive, self.mask, cartesian)
 
   @staticmethod
   def from_file(filename: str):
@@ -50,7 +51,7 @@ class PreOrder:
     mask = False
     with open(filename, 'r') as file:
 
-      # Search the key words '!obj:' or 'obj:'
+      # Seek the tokens '!obj:' or 'obj:'
       while True:
         heading = read_until(file, heading_separators, [':'])
         if not heading:
@@ -62,7 +63,7 @@ class PreOrder:
           break
 
       list_of_objects = []
-      # Search the key word 'rel:'
+      # Seek the token 'rel:'
       found_rel = False
       while not found_rel:
         tokens = read_until(file, separators, ['#', ':'], inclusive=True)
@@ -75,12 +76,11 @@ class PreOrder:
           objects = tokens[:-1]
           read_until(file, separators, ['\n'])
 
-        # Construct [list_of_objects] and [relations]
+        # Construct list_of_objects and relations
         for obj in objects:
-          # assert obj in list_of_objects == [obj] in relations
-          if obj not in list_of_objects:
+          # assert (obj in list_of_objects) == ([obj] in relations)
+          if obj not in list_of_objects:  # == [obj] not in relations
             list_of_objects.append(obj)
-          if [obj] not in relations:
             relations.append([obj])
 
       assert found_rel  # The key word 'rel:' must have been found
@@ -93,8 +93,8 @@ class PreOrder:
           successors = []
           if tokens == ['']:
             break
-          successors = tokens[:-1]
-          if tokens[-1] == ">":
+          *successors, last_token = tokens
+          if last_token == ">":
             break
           read_until(file, separators, ['\n'])
 
@@ -111,35 +111,34 @@ class PreOrder:
         if not successors or not predecessors:
           break  # EOF
 
-    return PreOrder(relations=relations, mask=mask)
+    return Proset(relations=relations, mask=mask)
 
-  def closure(self):
-    ''' Compute the transitive closure of the pre-order relations in the object.
+  def close(self):
+    ''' Compute the transitive closure of this set under its pre-order.
     '''
     if not self.transitive:
       self.transitive = True
-      for i, relation1 in enumerate(self.relations):
+      for i, elems1 in enumerate(self.relations):
         keep_going = True
         while keep_going:
           keep_going = False
-          for elt in relation1:
-            for j, relation2 in enumerate(self.relations):
-              if i != j and elt == relation2[0]:
-                for new_elt in relation2:
-                  if new_elt not in relation1:
-                    keep_going = True
-                    relation1.append(new_elt)
-                  else:
-                    keep_going = False
+          for elt1 in elems1:
+            for j, elems2 in enumerate(self.relations):
+              if i != j and elt1 == elems2[0]:
+                for elt2 in elems2:
+                  keep_going = elt2 not in elems1
+                  if keep_going:
+                    elems1.append(elt2)  # XXX Modifying a list while iterating over it
 
   def _geq(self, x: str, y: str) -> bool:
     ''' Is `x` greater than or equal to `y`?
     '''
-    self.closure()
-    return any(relation[0] == x and y in relation for relation in self.relations)
+    self.close()  # Transitivity (x >= y && y >= z => x >= z)
+    return any(elems[0] == x and y in elems for elems in self.relations)  # Reflexivity (x >= x)
 
   def geq(self, x: list or str, y: list or str) -> bool:
-    ''' Cartesian version of the method `_geq`
+    ''' Is there a pre-order relation between these two elements of the pre-ordered set?
+        Cartesian version of `_geq`.
     '''
     if self.cartesian == 0:
       return self._geq(x, y)
@@ -152,25 +151,25 @@ class PreOrder:
   def _inf(self, x: str, y: str) -> str:
     ''' Compute the infimum of `x` and `y`.
     '''
-    self.closure()
-    found_relation1 = False
-    found_relation2 = False
+    self.close()
+    found_elems1 = False
+    found_elems2 = False
     # In a single pass,
-    # find a relation whose first element is x
-    # and a relation whose first element is y
+    # find the elements of which x is the direct predecessor
+    # and the elements of which y is the direct precedessor
     # assert not any(x == y and i != j for i, x in enumerate(self.relations) for j, y in enumerate(self.relations))
-    for relation in self.relations:
-      if relation[0] == x:
-        relation1 = relation
-        found_relation1 = True
-      if relation[0] == y:
-        relation2 = relation
-        found_relation2 = True
-      if found_relation1 and found_relation2:
+    for elems in self.relations:
+      if elems[0] == x:
+        elems1 = elems
+        found_elems1 = True
+      if elems[0] == y:
+        elems2 = elems
+        found_elems2 = True
+      if found_elems1 and found_elems2:
         break
     else:
       return self.mask  # XXX Why return a bool?
-    intersection = set(relation1) & set(relation2)
+    intersection = set(elems1) & set(elems2)
     if not intersection:
       return self.mask  # XXX Why return a bool?
 
@@ -179,7 +178,8 @@ class PreOrder:
     return reduce(self.max, intersection)
 
   def inf(self, x: str, y: str) -> str:
-    ''' Cartesian version of the method `_inf`
+    ''' Return the infimum of these two elements of the pre-ordered set.
+        Cartesian version of `_inf`.
     '''
     if self.cartesian == 0:
       return self._inf(x, y)
@@ -189,5 +189,4 @@ class PreOrder:
   def __contains__(self, x: str) -> bool:
     ''' Does `x` belong to this pre-ordered set?
     '''
-    return any(x == relation[0] for relation in self.relations)
-
+    return any(x == elems[0] for elems in self.relations)

@@ -3,12 +3,12 @@
 #------------------------------------------------------------------------------
 '''
 [Objects]
-  .preorder [Type] PreOrder
+  .preorder [Type] Proset
 
 [Methods]
   .__init__
         [Inputs: 1]
-          - preorder [Type] PreOrder
+          - preorder [Type] Proset
         [Outputs: 0]
   .identity
         [Inputs: 2]
@@ -30,7 +30,7 @@
           - homset  [Type] list(MorphismOfSegments)
 
 [General description]
-  This structure models the features of a category of segments. The class is initialized by passing a PreOrder item to its constructor and allows one to know or compute information related to a category structure. The method [identity] returns a Boolean value that specificies whether there may exist an identity morphism between two SegmentObject items (these may be saved in different places in the memory); the method [initial] returns an local initial object in the category, where the local aspect is determined by the colors of the segment; the method [homset] computes the hom-set of a pair of SegmentObject items.
+  This structure models the features of a category of segments. The class is initialized by passing a Proset item to its constructor and allows one to know or compute information related to a category structure. The method [identity] returns a Boolean value that specificies whether there may exist an identity morphism between two SegmentObject items (these may be saved in different places in the memory); the method [initial] returns an local initial object in the category, where the local aspect is determined by the colors of the segment; the method [homset] computes the hom-set of a pair of SegmentObject items.
 
 >>> Method: .__init__
   [Actions]
@@ -57,7 +57,7 @@
     Returns the hom-set associated with the pair of objects ([source],[target]).
 '''
 #------------------------------------------------------------------------------
-from .cl_pro import PreOrder
+from .cl_pro import Proset
 from .cl_so import SegmentObject
 from .cl_mos import MorphismOfSegments
 
@@ -93,7 +93,7 @@ def inclusions(start: int, domain: int, holes: int) -> list[list[int]]:
 
 class CategoryOfSegments:
 #------------------------------------------------------------------------------
-  def __init__(self, preorder: PreOrder):
+  def __init__(self, preorder: Proset):
     self.preorder = preorder
 #------------------------------------------------------------------------------
   @staticmethod

@@ -28,9 +28,6 @@
         [Outputs: 1]
           - return [Type] SequenceAlignment
 
-[General description]
-  This structure models the features of an aligned environment functors, as defined in CTGI. As in aligned environment functors, this structure is associated with a PointedSet item [pset]. The class is also equipped with a fiber operation (pullback along a point in the image of the functor) and a sequence alignment functor constructor call. Specifically, the method [segment] returns a segment that is the pullback of the aligned environment functor above any input list that represents an element in one of its images. If the input list contains a character that is not in the object [pset.symbols], then the node associated with that character is masked in the returned segment. Aditionally, the method [seqali] construct a sequence aligment functor  from a file a sequence alignments, as shown in the development of CGTI.
-
 >>> Method: .__init__
   [Actions]
     .Seg    <- use(Seg)
@@ -60,27 +57,46 @@ from .cl_sal import SequenceAlignment
 
 from Pedigrad.SegmentCategory.cl_so import SegmentObject
 from Pedigrad.SegmentCategory.cl_cos import CategoryOfSegments
+from Pedigrad.AlignedFunctor.cl_pst import PointedSet
 
 from Pedigrad.utils import fasta
 #------------------------------------------------------------------------------
 #CODE
 #------------------------------------------------------------------------------
 class Environment:
+  '''
+  This structure models the features of an aligned environment functor,
+  as defined in CTGI.
+  As in aligned environment functors,
+  this structure is associated with a `PointedSet` (`pset`).
+  The class is also equipped with a fiber operation
+  (pullback along a point in the image of the functor)
+  and a sequence alignment functor constructor call.
+  Specifically, the method `segment` returns a segment
+  that is the pullback of the aligned environment functor above any input list
+  that represents an element in one of its images.
+  If the input list contains a character that is not in the pointed set `pset`,
+  then the node associated with that character is masked in the returned segment.
+  Aditionally, the method `seqali` construct a sequence aligment functor
+  from a file a sequence alignments, as shown in the development of CTGI.
+  '''
 #------------------------------------------------------------------------------
-  def __init__(self, Seg: CategoryOfSegments, pset, exponent: int, threshold: list):
+  def __init__(
+    self, Seg: CategoryOfSegments, pset: PointedSet, exponent: int, threshold: list
+  ):
     self.Seg = Seg
     self.pset = pset
     self.spec = exponent
-    self.b = threshold
     for i, x in enumerate(threshold):
       if x not in self.Seg.preorder:
         threshold[i] = self.Seg.preorder.mask
+    self.b = threshold
     for i in range(len(self.b), self.spec):
       self.b.append(self.Seg.preorder.mask)
 #------------------------------------------------------------------------------
-  def segment(self, a_list: list, color: list):
-    removal = [i for i, item in enumerate(a_list) if item not in self.pset.symbols]
-    return self.Seg.initial(len(a_list), color).remove(removal, 'nodes-given')
+  def segment(self, xs: list, color: list):
+    removal = [i for i, item in enumerate(xs) if item not in self.pset]
+    return self.Seg.initial(len(xs), color).remove(removal, 'nodes-given')
 #------------------------------------------------------------------------------
   def seqali(self, filename: str):
 
@@ -94,8 +110,8 @@ class Environment:
       if y not in indiv:
         indiv.append(y)
 
-    assert len(indiv) <= len(self.b), f"Error in Environment.seqali: {filename} contains more individuals than the number specified in the environment."
-    assert len(indiv) >= len(self.b), f"Error in Environment.seqali: {filename} contains fewer individuals than the number specified in the environment."
+    assert len(indiv) <= len(self.b), f"{filename} contains more individuals than the number specified in the environment."
+    assert len(indiv) >= len(self.b), f"{filename} contains fewer individuals than the number specified in the environment."
 
     group_colors = []
     alignments = []
@@ -104,17 +120,17 @@ class Environment:
       group_colors.append([self.Seg.preorder.mask] * len(indiv))
       alignments.append(['masked'] * len(indiv))
       check_lengths.append([])
-    for i, name in enumerate(names):
+    for name, sequence in zip(names, sequences):
       gl, ind, x = name
-      gli = group_labels.index(gl)
-      indi = indiv.index(ind)
-      group_color = group_colors[gli]
-      alignment = alignments[gli]
-      check_length = check_lengths[gli]
-      if self.Seg.preorder.geq(x, self.b[indi]) or self.b[indi] == True:
-        group_color[indi] = x
-        alignment[indi] = sequences[i]
-        n = len(alignment[indi])
+      i = group_labels.index(gl)
+      j = indiv.index(ind)
+      group_color = group_colors[i]
+      alignment = alignments[i]
+      check_length = check_lengths[i]
+      if self.Seg.preorder.geq(x, self.b[j]) or self.b[j] == True:
+        group_color[j] = x
+        alignment[j] = sequence
+        n = len(alignment[j])
         if n not in check_length:
           check_length.append(n)
 
@@ -124,11 +140,11 @@ class Environment:
     for check_length, color in zip(check_lengths, group_colors):
       if len(check_length) == 1:
         schema = [check_length[0], color]
-        indexing.append([schema, True])
+        indexing.append((schema, True))
         if schema not in record:
           record.append(schema)
       else:
-        indexing.append([[], False])
+        indexing.append(([], False))
 
     assert len(group_labels) == len(indexing) == len(alignments)
     base = [self.Seg.initial(*schema) for schema in record]
