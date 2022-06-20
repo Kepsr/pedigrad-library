@@ -34,9 +34,10 @@ class Proset:
     self.mask = mask
     self.cartesian = cartesian
 
-    # `relations` (which encodes the pre-order relations) is a dict pairing,
-    # every element of the pre-ordered set with a list starting with that element,
-    # and containing all the elements of which it is a predecessor.
+    # `relations` (which encodes the pre-order relations) is a dict
+    # that pairs every element of the pre-ordered set
+    # with a list containing all the elements of which it is a predecessor
+    # (including itself, by reflexivity).
 
   def copy(self, cartesian: int):
     assert cartesian > 0
@@ -54,14 +55,13 @@ class Proset:
       while True:
         heading = read_until(file, heading_separators, [':'])
         if not heading:
-          raise Exception(f"\'obj:\' was not found im {filename}")
+          raise Exception(f"\'obj:\' was not found in {filename}")
         if heading[-1] == "!obj":
           mask = True
           break
         if heading[-1] == "obj":
           break
 
-      list_of_objects = []
       # Seek the token 'rel:'
       found_rel = False
       while not found_rel:
@@ -75,11 +75,9 @@ class Proset:
           objects = tokens[:-1]
           read_until(file, separators, ['\n'])
 
-        # Construct list_of_objects and relations
+        # Construct relations
         for obj in objects:
-          # assert (obj in list_of_objects) == (obj in relations)
-          if obj not in list_of_objects:  # == obj not in relations
-            list_of_objects.append(obj)
+          if obj not in relations:
             relations[obj] = [obj]
 
       assert found_rel  # The key word 'rel:' must have been found
