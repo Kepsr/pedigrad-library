@@ -34,6 +34,11 @@ class Proset:
     self.mask = mask
     self.cartesian = cartesian
 
+    # Ensure all necessary keys are present
+    for x in sum(relations.values(), []):
+      if x not in relations:
+        self.relations[x] = [x]
+
     # `relations` (which encodes the pre-order relations) is a dict
     # that pairs every element of the pre-ordered set
     # with a list containing all the elements of which it is a predecessor
