@@ -114,25 +114,26 @@ class Proset:
   def close(self):
     ''' Compute the transitive closure of this set under its pre-order.
     '''
+    # Transitivity (x >= y && y >= z => x >= z)
+    # Reflexivity (x >= x)
     if not self.transitive:
-      self.transitive = True
-      for i, elems1 in enumerate(self.relations.values()):
+      for a, ageq in self.relations.items():
         keep_going = True
         while keep_going:
           keep_going = False
-          for elt1 in elems1:
-            for j, elems2 in enumerate(self.relations.values()):
-              if i != j and elt1 == elems2[0]:
-                for elt2 in elems2:
-                  keep_going = elt2 not in elems1
-                  if keep_going:
-                    elems1.append(elt2)  # XXX Modifying a list while iterating over it
+          for b in ageq:
+            if b == a: continue
+            for c in self.relations[b]:
+              keep_going = c not in ageq
+              if keep_going:
+                ageq.append(c)  # XXX Modifying a list while iterating over it
+      self.transitive = True
 
   def _geq(self, x: str, y: str) -> bool:
     ''' Is `x` greater than or equal to `y`?
     '''
-    self.close()  # Transitivity (x >= y && y >= z => x >= z)
-    return any(x == k and y in elems for k, elems in self.relations.items())  # Reflexivity (x >= x)
+    self.close()
+    return x in self.relations and y in self.relations[x]
 
   def geq(self, x: list or str, y: list or str) -> bool:
     ''' Is there a pre-order relation between these two elements of the pre-ordered set?
