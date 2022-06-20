@@ -26,7 +26,7 @@ class Proset:
   '''
 
   def __init__(
-    self, relations: list[list[str]] = [],
+    self, relations: dict[str, list[str]] = [],
     transitive: bool = False, mask: bool = False, cartesian: int = 0
   ):
     self.relations = relations
@@ -34,10 +34,9 @@ class Proset:
     self.mask = mask
     self.cartesian = cartesian
 
-    # `relations` (which encodes the pre-order relations) is a list containing,
-    # for every element of the pre-ordered set, an internal list starting with that element.
-    # Each such internal list contains all the elements
-    # of which its first element is a predecessor.
+    # `relations` (which encodes the pre-order relations) is a dict pairing,
+    # every element of the pre-ordered set with a list starting with that element,
+    # and containing all the elements of which it is a predecessor.
 
   def copy(self, cartesian: int):
     assert cartesian > 0
@@ -47,7 +46,7 @@ class Proset:
   def from_file(filename: str):
     assert filename, "filename cannot be empty"
 
-    relations = []
+    relations = {}
     mask = False
     with open(filename, 'r') as file:
 
@@ -78,14 +77,14 @@ class Proset:
 
         # Construct list_of_objects and relations
         for obj in objects:
-          # assert (obj in list_of_objects) == ([obj] in relations)
-          if obj not in list_of_objects:  # == [obj] not in relations
+          # assert (obj in list_of_objects) == (obj in relations)
+          if obj not in list_of_objects:  # == obj not in relations
             list_of_objects.append(obj)
-            relations.append([obj])
+            relations[obj] = [obj]
 
       assert found_rel  # The key word 'rel:' must have been found
 
-      # If the key word 'rel:' was found, search the symbols '>' and ';'
+      # If the key word 'rel:' was found, seek the symbols '>' and ';'
       while True:
 
         while True:
@@ -102,11 +101,10 @@ class Proset:
         predecessors = read_until(file, separators, [';'])
         for successor in set(successors):
           try:
-            i = list_of_objects.index(successor)
             for predecessor in predecessors:
-              if predecessor not in relations[i]:
-                relations[i].append(predecessor)
-          except ValueError:  # successor is not in list_of_objects
+              if predecessor not in relations[successor]:
+                relations[successor].append(predecessor)
+          except KeyError:  # successor is not in relations
             print(f"Warning: in \'{filename}\': {successor} is not an object")
         if not successors or not predecessors:
           break  # EOF
@@ -118,12 +116,12 @@ class Proset:
     '''
     if not self.transitive:
       self.transitive = True
-      for i, elems1 in enumerate(self.relations):
+      for i, elems1 in enumerate(self.relations.values()):
         keep_going = True
         while keep_going:
           keep_going = False
           for elt1 in elems1:
-            for j, elems2 in enumerate(self.relations):
+            for j, elems2 in enumerate(self.relations.values()):
               if i != j and elt1 == elems2[0]:
                 for elt2 in elems2:
                   keep_going = elt2 not in elems1
@@ -134,7 +132,7 @@ class Proset:
     ''' Is `x` greater than or equal to `y`?
     '''
     self.close()  # Transitivity (x >= y && y >= z => x >= z)
-    return any(elems[0] == x and y in elems for elems in self.relations)  # Reflexivity (x >= x)
+    return any(x == k and y in elems for k, elems in self.relations.items())  # Reflexivity (x >= x)
 
   def geq(self, x: list or str, y: list or str) -> bool:
     ''' Is there a pre-order relation between these two elements of the pre-ordered set?
@@ -152,22 +150,11 @@ class Proset:
     ''' Compute the infimum of `x` and `y`.
     '''
     self.close()
-    found_elems1 = False
-    found_elems2 = False
-    # In a single pass,
-    # find the elements of which x is the direct predecessor
-    # and the elements of which y is the direct precedessor
-    # assert not any(x == y and i != j for i, x in enumerate(self.relations) for j, y in enumerate(self.relations))
-    for elems in self.relations:
-      if elems[0] == x:
-        elems1 = elems
-        found_elems1 = True
-      if elems[0] == y:
-        elems2 = elems
-        found_elems2 = True
-      if found_elems1 and found_elems2:
-        break
-    else:
+    # Find the elements of which x is the direct predecessor
+    #  and the elements of which y is the direct precedessor
+    elems1 = self.relations.get(x, None)
+    elems2 = self.relations.get(y, None)
+    if elems1 is None or elems2 is None:
       return self.mask  # XXX Why return a bool?
     intersection = set(elems1) & set(elems2)
     if not intersection:
@@ -189,4 +176,4 @@ class Proset:
   def __contains__(self, x: str) -> bool:
     ''' Does `x` belong to this pre-ordered set?
     '''
-    return any(x == elems[0] for elems in self.relations)
+    return x in self.relations
