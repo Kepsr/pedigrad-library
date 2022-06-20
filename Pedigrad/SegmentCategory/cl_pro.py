@@ -123,10 +123,9 @@ class Proset:
           keep_going = False
           for b in ageq:
             if b == a: continue
-            for c in self.relations[b]:
-              keep_going = c not in ageq
-              if keep_going:
-                ageq.append(c)  # XXX Modifying a list while iterating over it
+            cs = [c for c in self.relations[b] if c not in ageq]
+            keep_going = bool(cs)
+            ageq.extend(cs)  # XXX Modifying a list while iterating over it
       self.transitive = True
 
   def _geq(self, x: str, y: str) -> bool:
