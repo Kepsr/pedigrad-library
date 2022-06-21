@@ -20,3 +20,6 @@ class PointedSet:
 
   def __contains__(self, x):
     return x in self.symbols
+
+  def tuple(self):
+    return self.symbols, self.point()
