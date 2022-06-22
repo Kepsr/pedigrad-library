@@ -17,7 +17,7 @@ class SegmentObject:
   In this implementation, `parse` stores the position of the read head.
   '''
 
-  def __init__(self, domain: int, topology: list[tuple[int, int]], colors: list[str]):
+  def __init__(self, domain: int, topology: list[tuple[int, int]], colors: list[int]):
     assert len(colors) == len(topology), "lengths do not match"
     assert domain >= len(topology)
     self.domain = domain
@@ -139,18 +139,16 @@ class SegmentObject:
         break
       final = min(max(initial, end + 1), len(self.topology))
       saved_pos = 0
-      saved_color = ''
+      saved_color = None
       for i in range(initial, final):
         #Look for masked patches within the tiling
         if i + 1 < len(self.topology) \
         and self.topology[i + 1][0] - self.topology[i][1] > 1:
           saved_color = True
-        #If no color has been allocated yet (first color)
-        if saved_color == '':
-          saved_color = self.colors[i]
-        #Otherwise, take the infimum with the previous color
-        else:
-          saved_color = infimum(self.colors[i], saved_color)
+        # Take the first color if none has been allocated yet
+        saved_color = self.colors[i] if saved_color is None else \
+            infimum(self.colors[i], saved_color)
+        # Otherwise, take the infimum with the previous color
         if i % modulus == initial % modulus:
           saved_pos = self.topology[i][0]
         if i % modulus == (initial - 1) % modulus or i == final - 1:
@@ -158,7 +156,7 @@ class SegmentObject:
             new_topology.append((saved_pos, self.topology[i][1]))
             new_colors.append(saved_color)
           #Repeat the same process if the tiling continues
-          saved_color = ''
+          saved_color = None
       if j == len(folding_format) - 1:
         new_topology.extend(self.topology[final:])
         new_colors.extend(self.colors[final:])

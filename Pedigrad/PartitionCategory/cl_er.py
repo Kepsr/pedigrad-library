@@ -39,7 +39,6 @@ eq2.quotient() = [1, 1, 1, 0, 2, 3, 4, 0, 0, 1, 5, 6, 7, 8, 9, 1, 10, 11, 12]
 '''
 
 from .jpop import _join_preimages_of_partitions, FAST
-from Pedigrad.utils import is_index
 
 class EquivalenceRelation:
   #The objects of the class are:
@@ -49,14 +48,12 @@ class EquivalenceRelation:
   #the first one being a list and the second being an integer.
   def __init__(self, classes: list[list[int]], m: int = -1):
 
-    elements = set()  # The set of indices on which the classes is defined
-    for class_ in classes:
-      for j in class_:
-        #The elements should be non-negative integers. If there are not, the
-        #procedure outputs an error message and exits the program.
-        assert is_index(j), "`classes` should be a list of lists of non-negative integers."
-        #Elements that appear several times are only counted once.
-        elements.add(j)
+    # The set of indices on which the classes is defined
+    elements = {j for class_ in classes for j in class_}
+    # The elements should be non-negative integers.
+    # If any is not, raise an exception.
+    assert all(j >= 0 for j in elements), "`classes` should be a list of lists of non-negative integers."
+    #Elements that appear several times are only counted once.
     #The variable 'individuals' contains the number of distinct elements that
     #the first input contains.
     if elements:
@@ -77,7 +74,7 @@ class EquivalenceRelation:
       self.classes = classes
     else:
       assert m != -1, "`classes` is trivial: `m` is required."
-      assert is_index(m), "`m` should be a non-negative integer."
+      assert m >= 0, "`m` should be a non-negative integer."
       self.range = m
       self.classes = [[i] for i in range(m + 1)]
 

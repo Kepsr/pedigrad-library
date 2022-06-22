@@ -1,5 +1,5 @@
 from .efp import _epi_factorize_partition
-from .iop import _image_of_partition
+from Pedigrad.utils import nub
 
 def _preimage_of_partition(partition: list) -> list[list]:
   '''
@@ -14,11 +14,11 @@ def _preimage_of_partition(partition: list) -> list[list]:
   - the list [2,3] is the fiber of the element 2;
   - the list [4,5] is the fiber of the element 3.
 
-  The preimage will always orders its fibers with respect to the order in which the elements of the input list appear.
+  The preimage will always order its fibers with respect to the order in which the elements of the input list appear.
 
   '''
-  # Fill preimage with empty lists in order to store the fibers of the partition.
-  preimage = [[] for _ in _image_of_partition(partition)]
+  # preimage will store the fibers of the partition.
+  preimage = [[] for _ in nub(partition)]
   # The number of fibers contained by the preimage is equal
   # to the number of elements in the image of the partition.
   # The relabeled list of 'partition' gives the desired indexing

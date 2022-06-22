@@ -37,7 +37,7 @@ t = []
 c = []
 for i in range(domain):
   t.append((i, i))
-  c.append('?' if i % 15 == 11 else str((i % 2) + 1))
+  c.append('?' if i % 15 == 11 else (i % 2) + 1)
 
 s = SegmentObject(domain, t, c)
 sys.stdout.write("s = ")
