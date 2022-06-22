@@ -59,5 +59,6 @@ Copy the following text in the appropriate section of Pedigrad.py and replace ``
       return _non_importable_function(*args)
 ```
 
+## Reading
 
-
+- Tuyéras, R. *Category Theory for Genetics* https://arxiv.org/abs/1708.05255
