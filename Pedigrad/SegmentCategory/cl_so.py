@@ -30,12 +30,14 @@ class SegmentObject:
       if x <= a <= y:
         return i
     return -1
-    # n0 = self.topology[-1][-1]
-    # codomain = set(range(n0 + 1))
-    # return image == codomain
+
+  def is_t_surjection(self):
+    codomain = set(range(len(self.colors)))
+    image = set(x for x in map(self.t, range(self.domain)) if x != -1)
+    return codomain == image
 
   def _start(self):
-    ''' Sets the read head to index 0 if the read head is outside of the segment domain.
+    ''' Sets the read head to index 0 if outside the segment domain.
     '''
     if not (0 <= self.parse < len(self.topology)):
       self.parse = 0
@@ -177,3 +179,10 @@ class SegmentObject:
         new_topology.append(topo)
         new_colors.append(color)
     return SegmentObject(self.domain, new_topology, new_colors)
+
+
+def homologous(s1: SegmentObject, s2: SegmentObject):
+  return s1.topology == s2.topology
+
+def quasihomologous(s1: SegmentObject, s2: SegmentObject):
+  return s1.domain == s2.domain
