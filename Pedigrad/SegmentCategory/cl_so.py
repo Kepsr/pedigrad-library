@@ -54,18 +54,15 @@ class SegmentObject:
     self._start()
     if position not in range(self.domain):  # position < 0 or position >= self.domain
       return -1
-    # n0 = max(max(x, y) for x, y in self.topology)
-    while self.parse in range(len(self.topology)):  # 0 <= self.parse < n0
-      x, y = self.topology[self.parse]  # t(i)
-      if position < x:
-        if step > 0:
+    while self.parse in range(len(self.topology)):  # 0 <= self.parse < len(self.topology)
+      start, stop = self.topology[self.parse]
+      if start <= position <= stop:  # position in range(start, stop + 1)
+        return self.parse
+      if step == 0 \
+      or position < start and step > 0 \
+      or position > stop  and step < 0:
           return -1
-        self.parse += step
-      elif position > y:
-        if step < 0:
-          return -1
-        self.parse += step
-      return self.parse
+      self.parse += step
     return -1
 
   def __repr__(self):
@@ -97,7 +94,8 @@ class SegmentObject:
     saved_parse = self.parse
     prec_value = -1
     self.parse = 0
-    while i <= min(self.domain - 1, self.topology[-1][1]):
+    n0 = self.topology[-1][1]
+    while i <= min(self.domain - 1, n0):
       value = self.patch(i)
       if i == self.topology[0][0]:
         prec_value = value
