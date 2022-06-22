@@ -1,4 +1,4 @@
-from .iop import _image_of_partition
+from Pedigrad.utils import nub
 
 def _epi_factorize_partition(partition: list) -> list:
   '''
@@ -12,18 +12,8 @@ def _epi_factorize_partition(partition: list) -> list:
   e.g. _epi_factorize_partition(['A',4,'C','C','a','A']) = [0, 1, 2, 2, 3, 0]
 
   '''
-  #The relabeling depends on the cardinal of the image of the partition.
-  #Computing the cardinal of the image is roughly the same as computing
-  #the image itself.
-  image = _image_of_partition(partition)
-  #A space is allocated to contain the relabeled list.
-  epimorphism = []
-  #If the i-th element of the list is the j-th element of the image
-  #then this element is relabelled by the integer j.
-  for x in partition:
-    for i, y in enumerate(image):
-      if x == y:
-        epimorphism.append(i)
-        break
-  #Returns the relabeled list.
-  return epimorphism
+  # The relabeling depends on the cardinal of the image of the partition.
+  # Computing the cardinal of the image is roughly the same as computing the image itself.
+  image = nub(partition)
+  # Each item in partition is replaced with its index in image.
+  return [image.index(x) for x in partition]

@@ -61,7 +61,7 @@ The function stops because there is no more list to process in p1.
 The output is all the non-empty lists of p2; i.e. [[1, 4, 0, 3], [2]]
 '''
 
-from .iop import _image_of_partition
+from Pedigrad.utils import nub
 
 FAST = True
 
@@ -70,12 +70,11 @@ def _join_preimages_of_partitions(preimage1: list, preimage2: list, speed_mode: 
   # Herein we modify lists while iterating over them. 
   # This can go horribly wrong.
 
-  #Spaces are allocated in the memory so that the lists saved at the addresses
-  #of the variables 'preimage1' and 'preimage2' are not modified. 
-  tmp1 = [_image_of_partition(x) for x in preimage1]
-  tmp2 = [_image_of_partition(x) for x in preimage2]
-  #In addition, repetitions that may occur in each internal list of the 
-  #two inputs are eliminated: e.g. [7,1,3,4,7] --> [7,1,3,4]
+  # Make copies so as not to modify preimage1, preimage2
+  # In addition, repetitions that may occur in each internal list of the 
+  # two inputs are eliminated:
+  tmp1 = [nub(x) for x in preimage1]
+  tmp2 = [nub(x) for x in preimage2]
   #Reads preimage1;
   for internal_list1 in tmp1:
     #Reads in the internal lists of preimage1;
@@ -94,7 +93,7 @@ def _join_preimages_of_partitions(preimage1: list, preimage2: list, speed_mode: 
             internal_list2 = []
             # Repeated elements occuring in the union of the two internal lists, in preimage1,
             # are eliminated.
-            internal_list1 = _image_of_partition(internal_list1)
+            internal_list1 = nub(internal_list1)
             break
         else: 
           # x1 no longer needs to be sought in preimage2.

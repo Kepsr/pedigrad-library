@@ -90,7 +90,7 @@ from .cl_pgs import Phylogenesis
 
 from Pedigrad.AsciiTree.pet import print_evolutionary_tree
 
-from Pedigrad.PartitionCategory.iop import _image_of_partition
+from Pedigrad.utils import nub
 from Pedigrad.PartitionCategory.cl_er import EquivalenceRelation
 from Pedigrad.PartitionCategory.cl_mop import MorphismOfPartitions
 from Pedigrad.PartitionCategory.efp import _epi_factorize_partition
@@ -186,9 +186,9 @@ class Phylogeny:
       # Does the taxon t appear in the first components of the pairs of the list 'extension'?
       for _ in extension:
         if x[0] == t:
-          #The procedure _image_of_partition is used to eliminate the
+          #The procedure nub is used to eliminate the
           #repetitions of integers that can occur in x[1].
-          phylogenesis.history.append(_image_of_partition(x[1]))
+          phylogenesis.history.append(nub(x[1]))
           break
       else:
         continue
@@ -223,10 +223,10 @@ class Phylogeny:
       if r not in x:
         friends.append(r)
         #The union of x and y is computed through
-        #_image_of_partition and then sorted in order to give a unique
+        #nub and then sorted in order to give a unique
         #representative to the union (e.g. [0,1]U[2,5] should be the same
         #as [2,5]U[0,1].
-        common_ancestor = sorted(_image_of_partition(x + y))
+        common_ancestor = sorted(nub(x + y))
         coalescence_hypothesis.append(common_ancestor)
     #the procedure returns the list of friends for the input taxon and the
     #associated common ancestors stored in the list 'coalescence_hypothesis'.
@@ -350,13 +350,13 @@ class Phylogeny:
         #The list score_coeff corresponds to what is called the 'support
         #functor' in the mathematical version of the present work.
         #Also, since the images of the support functor are sets, we need to
-        #consider the output of the procedure _image_of_partition(score_coeff)
+        #consider the output of the procedure nub(score_coeff)
         #instead of the list score_coeff itself since it may contain several
         #times the same list.
         #Use if needed:
         #print("[DEBUG] Support functor("+str((t,i))+"): " \
-        #+ str(_image_of_partition(score_coeff)))
-        score_row.append(_image_of_partition(score_coeff))
+        #+ str(nub(score_coeff)))
+        score_row.append(nub(score_coeff))
       score_matrix.append(score_row)
     #STEP 2:
     #The following lines integrate the tensor score_matrix[i][t][r] over
@@ -372,7 +372,7 @@ class Phylogeny:
     # Run over the image of x,
     # which means that only the representative of the hypothetical
     # ancestors is important and not the taxa 'r' they may be associated with.
-    score_cardinality = [[[0, 0] for _ in _image_of_partition(x)] for x in labeling]
+    score_cardinality = [[[0, 0] for _ in nub(x)] for x in labeling]
     #The matrix 'score_cardinality' is now updated by counting the flags that
     #were set to False and True in the 3-dimensional tensor 'score_matrix'.
     for row in score_matrix:
@@ -474,11 +474,11 @@ class Phylogeny:
     for x, y in zip(coalescent, best_fit):
         #The following ensures that if y is empty, then the first
         #generation of the phylogenesis of t is given.
-        common_ancestor = _image_of_partition(x)
+        common_ancestor = nub(x)
         #The following loop add the first generations of the friend of the
         #taxon t to the 'common ancestors.
         for r in y:
-          common_ancestor = _image_of_partition(common_ancestor + coalescent[r])
+          common_ancestor = nub(common_ancestor + coalescent[r])
         #The list 'common_ancestor' to only give one representative to the
         #union it represents.
         common_ancestor.sort()

@@ -17,7 +17,7 @@ Their zip is as follows:
 p3 = zip(p1,p2) = [(0,0),(1,1),(2,2),(3,3),(3,3),(4,3),(5,1)]
 
 The image of the product is then as follows:
-p4 = _image_of_partition(p3) = [(0,0),(1,1),(2,2),(3,3),(4,3),(5,1)]
+p4 = nub(p3) = [(0,0),(1,1),(2,2),(3,3),(4,3),(5,1)]
 
 We can see that for each pair (x,y) in p4, every component x is mapped to a unique image y so that p4 defines the morphism of partitions between p1 and p2.
 
@@ -33,7 +33,7 @@ As can be seen, the argument 3 is 'mapped' to two different images, namely 3 and
 
 '''
 from Pedigrad.PartitionCategory.efp import _epi_factorize_partition
-from Pedigrad.PartitionCategory.iop import _image_of_partition
+from Pedigrad.utils import nub
 
 class MorphismOfPartitions:
 
@@ -55,7 +55,7 @@ class MorphismOfPartitions:
     #encode the function from the codomain of the underlying
     #epimorphism encoding the source partition to the codomain of the
     #epimorphsim encoding the target partition.
-    self.arrow = _image_of_partition(zip(self.source,self.target))
+    self.arrow = nub(zip(self.source,self.target))
     #The following loop checks if the binary relation contained 
     #in self.arrow is a function.
     for i, (x, y) in enumerate(self.arrow):

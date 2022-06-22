@@ -84,3 +84,9 @@ def is_index(x):
     return int(x) == x and x >= 0
   except:
     return False
+
+def nub(xs: list) -> list:
+  ''' Take a list and return a new list lacking repeats
+      but otherwise retaining the order of elements.
+  '''
+  return list(dict.fromkeys(xs))

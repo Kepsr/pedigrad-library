@@ -1,5 +1,3 @@
-from .iop import _image_of_partition
-
 from .efp import _epi_factorize_partition
 
 from .piop import _preimage_of_partition
