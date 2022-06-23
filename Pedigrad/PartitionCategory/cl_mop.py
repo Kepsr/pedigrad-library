@@ -55,7 +55,7 @@ class MorphismOfPartitions:
     #encode the function from the codomain of the underlying
     #epimorphism encoding the source partition to the codomain of the
     #epimorphsim encoding the target partition.
-    self.arrow = nub(zip(self.source,self.target))
+    self.arrow = nub(zip(self.source, self.target))
     #The following loop checks if the binary relation contained 
     #in self.arrow is a function.
     for i, (x, y) in enumerate(self.arrow):
