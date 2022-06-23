@@ -1,5 +1,6 @@
 from Pedigrad.utils import read_until
 from functools import reduce
+from itertools import product
 
 # Characters that cannot be used to name an element of a pre-ordered set
 heading_separators = [
@@ -29,7 +30,7 @@ class Proset:
 
   def __init__(
     self, relations: dict[T, list[T]] = {},
-    transitive: bool = False, mask: bool = False, cartesian: int = 0
+    transitive: bool = False, mask: bool = False, cartesian: int = 1
   ):
     self.relations = relations
     self.transitive = transitive
@@ -45,10 +46,6 @@ class Proset:
     # that pairs every element of the pre-ordered set
     # with a list containing all the elements of which it is a predecessor
     # (including itself, by reflexivity).
-
-  def copy(self, cartesian: int):
-    assert cartesian > 0
-    return Proset(self.relations, self.transitive, self.mask, cartesian)
 
   @staticmethod
   def from_file(filename: str):
@@ -146,13 +143,15 @@ class Proset:
     ''' Is `x` greater than or equal to `y`?
     '''
     self.close()
+    if isinstance(x, list):
+      x = tuple(x)
     return x in self.relations and y in self.relations[x]
 
   def geq(self, x: T, y: T) -> bool:
     ''' Is there a pre-order relation between these two elements of the pre-ordered set?
         Cartesian version of `_geq`.
     '''
-    if self.cartesian == 0:
+    if self.cartesian == 1:
       return self._geq(x, y)
 
     return all(y[i] or self._geq(x[i], y[i]) for i in range(self.cartesian))
@@ -182,7 +181,7 @@ class Proset:
     ''' Return the infimum of these two elements of the pre-ordered set.
         Cartesian version of `_inf`.
     '''
-    if self.cartesian == 0:
+    if self.cartesian == 1:
       return self._inf(x, y)
 
     return [self._inf(a, b) for i, a, b in zip(range(self.cartesian), x, y)]
@@ -194,3 +193,38 @@ class Proset:
     ''' Does `x` belong to this pre-ordered set?
     '''
     return x in self.relations
+
+  def __len__(self):
+    return len(self.relations)
+
+  def __pow__(self, n: int):
+    ''' The Cartesian product of this proset with itself n times.
+    '''
+    assert n > 0
+    return ProductofProsets(*(self,) * n)
+
+
+BoolProset = Proset({True: [True, False], False: [False]})
+
+
+class ProductofProsets(Proset):
+
+  def __init__(self, *prosets):
+    self.prosets = prosets
+
+  def geq(self, xs, ys):
+    return all(y or p.geq(x, y) for p, x, y in zip(self.prosets, xs, ys))
+
+  def inf(self, xs, ys):
+    return tuple(p.inf(x, y) for p, x, y in zip(self.prosets, xs, ys))
+
+
+# The relations dict is hideously expensive to generate.
+# A proset of size m, when raised to the nth power, will give rise to one of size m ** n.
+def product_of_proset(proset: Proset, n: int) -> Proset:
+  elems = tuple(product(*(proset.relations,) * n))
+  relations = {
+    xs: [ys for ys in elems if all(proset.geq(x, y) for x, y in zip(xs, ys))]
+    for xs in elems
+  }
+  return Proset(relations)
