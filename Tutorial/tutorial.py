@@ -11,7 +11,6 @@ from Pedigrad import (
 Omega = Proset.from_file("omega.yml")
 print(Omega.relations)
 print(Omega.mask)
-print(Omega.cartesian)
 Omega.close()
 print("--after:")
 print(Omega.relations)

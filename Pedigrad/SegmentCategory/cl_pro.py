@@ -30,12 +30,11 @@ class Proset:
 
   def __init__(
     self, relations: dict[T, list[T]] = {},
-    transitive: bool = False, mask: bool = False, cartesian: int = 1
+    transitive: bool = False, mask: bool = False,
   ):
     self.relations = relations
     self.transitive = transitive
     self.mask = mask
-    self.cartesian = cartesian
 
     # Ensure all necessary keys are present
     for x in sum(relations.values(), []):
@@ -139,7 +138,7 @@ class Proset:
     # Reflexivity: x >= x
     return all(self.geq(a, a) for a in self)
 
-  def _geq(self, x: T, y: T) -> bool:
+  def geq(self, x: T, y: T) -> bool:
     ''' Is `x` greater than or equal to `y`?
     '''
     self.close()
@@ -147,20 +146,11 @@ class Proset:
       x = tuple(x)
     return x in self.relations and y in self.relations[x]
 
-  def geq(self, x: T, y: T) -> bool:
-    ''' Is there a pre-order relation between these two elements of the pre-ordered set?
-        Cartesian version of `_geq`.
-    '''
-    if self.cartesian == 1:
-      return self._geq(x, y)
-
-    return all(y[i] or self._geq(x[i], y[i]) for i in range(self.cartesian))
-
   def max(self, x: T, y: T) -> T:
     return x if self.geq(x, y) else y
 
-  def _inf(self, x: T, y: T) -> T:
-    ''' Compute the infimum of `x` and `y`.
+  def inf(self, x: T, y: T) -> T:
+    ''' The infimum of `x` and `y`.
     '''
     self.close()
     # Find the elements of which x is the direct predecessor
@@ -177,15 +167,6 @@ class Proset:
     # when we are calculating an infimum.
     return reduce(self.max, intersection)
 
-  def inf(self, x: T, y: T) -> T:
-    ''' Return the infimum of these two elements of the pre-ordered set.
-        Cartesian version of `_inf`.
-    '''
-    if self.cartesian == 1:
-      return self._inf(x, y)
-
-    return [self._inf(a, b) for i, a, b in zip(range(self.cartesian), x, y)]
-
   def __iter__(self):
     return iter(self.relations)
 
@@ -200,7 +181,6 @@ class Proset:
   def __pow__(self, n: int):
     ''' The Cartesian product of this proset with itself n times.
     '''
-    assert n > 0
     return ProductofProsets(*(self,) * n)
 
 
@@ -208,8 +188,10 @@ BoolProset = Proset({True: [True, False], False: [False]})
 
 
 class ProductofProsets(Proset):
+  ''' The Cartesian product of a list of prosets.
+  '''
 
-  def __init__(self, *prosets):
+  def __init__(self, *prosets: list[Proset]):
     self.prosets = prosets
 
   def geq(self, xs, ys):
@@ -218,13 +200,15 @@ class ProductofProsets(Proset):
   def inf(self, xs, ys):
     return tuple(p.inf(x, y) for p, x, y in zip(self.prosets, xs, ys))
 
-
-# The relations dict is hideously expensive to generate.
-# A proset of size m, when raised to the nth power, will give rise to one of size m ** n.
-def product_of_proset(proset: Proset, n: int) -> Proset:
-  elems = tuple(product(*(proset.relations,) * n))
-  relations = {
-    xs: [ys for ys in elems if all(proset.geq(x, y) for x, y in zip(xs, ys))]
-    for xs in elems
-  }
-  return Proset(relations)
+  @property
+  def relations(self) -> dict:
+    # The relations dict is hideously expensive to generate.
+    # The size of the relations dict of a product of prosets
+    # will be the product of the sizes of the relations dicts of the prosets.
+    # In pseudocode:
+    # len(product(d for d in ds)) = product(len(d) for d in ds)
+    elems = tuple(product(*self.prosets))
+    return {
+      xs: [ys for ys in elems if all(p.geq(x, y) for p, x, y in zip(self.prosets, xs, ys))]
+      for xs in elems
+    }
