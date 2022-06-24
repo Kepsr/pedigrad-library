@@ -1,5 +1,4 @@
 from Pedigrad.SegmentCategory import Proset, SegmentObject, CategoryOfSegments
-# from Pedigrad.AlignedFunctor import Environment  # Circular import
 
 
 class SequenceAlignment:
@@ -8,24 +7,23 @@ class SequenceAlignment:
       and can be queried throught the method `eval`.
   '''
 
-  def __init__(self, env: 'Environment', indiv: list, base: list, database: list):
-    self.env = env
+  def __init__(self, proset: Proset, indiv: list, base: list, database: list):
     self.indiv = indiv
     self.base = base
     self.database = database
-    self.Seg = CategoryOfSegments(env.Seg.preorder ** env.spec)
+    self.Seg = CategoryOfSegments(proset)
 
   def eval(self, segment: SegmentObject):
-    ''' This method returns the image of the sequence alignment functor for the given input SegmentObject item.
+    ''' This method returns the image of the sequence alignment functor for the given segment.
     '''
-    for i, item in enumerate(self.base):
-      if self.Seg.identity(segment, item):
-        return self.database[i]
+    for x, y in zip(self.base, self.database):
+      if self.Seg.identity(segment, x):
+        return y
     return []
 
   def extending_category(self, segment: SegmentObject) -> list:
     ''' Compute the objects of the extending category
-        for computing the right Kan extension of the functor encoded by the method `self.eval`.
+        for computing the right Kan extension of the functor encoded by `self.eval()`.
     '''
     return [
       (i, m)

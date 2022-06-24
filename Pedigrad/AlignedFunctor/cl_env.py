@@ -1,68 +1,8 @@
-#------------------------------------------------------------------------------
-#Environment (Class) | 4 objects | 3 methods
-#------------------------------------------------------------------------------
-'''
-[Objects]
-  .Seg  [Type] CategoryOfSegments('a)
-  .pset [Type] PointedSet('b)
-  .spec [Type] int
-  .b    [Type] list('a)
-
-[Methods]
-  .__init__
-        [Inputs: 4]
-          - Seg       [Type] CategoryOfSegments('a)
-          - pset      [Type] PointedSet('b)
-          - exponent  [Type] int
-          - threshold [Type] list('a)
-        [Outputs: 0]
-  .segment
-        [Inputs: 2]
-          - a_list  [Type] list('b)
-          - color   [Type] 'a
-        [Outputs: 1]
-          - return [Type] SegmentObject('a)
-  .seqali
-        [Inputs: 1]
-          - filename [Type] string
-        [Outputs: 1]
-          - return [Type] SequenceAlignment
-
->>> Method: .__init__
-  [Actions]
-    .Seg    <- use(Seg)
-    .pset   <- use(pset)
-    .spec   <- use(exponent)
-    .b       <- use(threshold,Seg,spec)
-  [Description]
-    This is the constructor of the class.
-
->>> Method: .segment
-  [Actions]
-    .return   <- use(a_list,color,self.Seg,self.pset)
-  [Description]
-    This method returns a segment that is the pullback of the underlying environment functor above the input list. If the list contains a character that is not in the list self.pset.symbols, then the node associated with that character is masked in the returned segment.
-
->>> Method: .seqali
-  [Actions]
-    .return  <- use(filename,fasta,self.Seg,self.b)
-  [Description]
-    This method constructs a sequence aligment functor from a file of sequence alignments, as shown in the development of Example 3.22 of CTGI.
-
-'''
-#------------------------------------------------------------------------------
-#Dependencies: current, SegmentCategory
-#------------------------------------------------------------------------------
-from .cl_sal import SequenceAlignment
-
-from Pedigrad.SegmentCategory.cl_so import SegmentObject
-from Pedigrad.SegmentCategory.cl_cos import CategoryOfSegments
-from Pedigrad.AlignedFunctor.cl_pst import PointedSet
-
+from Pedigrad.SegmentCategory import SegmentObject, CategoryOfSegments
+from Pedigrad.AlignedFunctor import PointedSet, SequenceAlignment
 from Pedigrad.utils import fasta
-#------------------------------------------------------------------------------
-#CODE
-#------------------------------------------------------------------------------
+
+
 class Environment:
   '''
   This structure models the features of an aligned environment functor,
@@ -71,16 +11,9 @@ class Environment:
   this structure is associated with a `PointedSet` (`pset`).
   The class is also equipped with a fiber operation
   (pullback along a point in the image of the functor)
-  and a sequence alignment functor constructor call.
-  Specifically, the method `segment` returns a segment
-  that is the pullback of the aligned environment functor above any input list
-  that represents an element in one of its images.
-  If the input list contains a character that is not in the pointed set `pset`,
-  then the node associated with that character is masked in the returned segment.
-  Aditionally, the method `seqali` construct a sequence aligment functor
-  from a file a sequence alignments, as shown in the development of CTGI.
+  and a sequence alignment functor constructor.
   '''
-#------------------------------------------------------------------------------
+
   def __init__(
     self, Seg: CategoryOfSegments, pset: PointedSet, exponent: int, threshold: list
   ):
@@ -88,17 +21,25 @@ class Environment:
     self.pset = pset
     self.spec = exponent
     for i, x in enumerate(threshold):
-      if x not in self.Seg.preorder:
-        threshold[i] = self.Seg.preorder.mask
+      if x not in self.Seg.proset:
+        threshold[i] = self.Seg.proset.mask
     self.b = threshold
     for i in range(len(self.b), self.spec):
-      self.b.append(self.Seg.preorder.mask)
-#------------------------------------------------------------------------------
+      self.b.append(self.Seg.proset.mask)
+
   def segment(self, xs: list, color: list):
+    ''' Return a segment that is the pullback of the aligned environment functor above `xs`,
+        which represents an element in one of its images.
+        If `xs` contains a character that is not in the pointed set `self.pset`,
+        then the node associated with that character is masked in the returned segment.
+    '''
     removal = [i for i, item in enumerate(xs) if item not in self.pset]
     return self.Seg.initial(len(xs), color).remove(removal, 'nodes-given')
-#------------------------------------------------------------------------------
+
   def seqali(self, filename: str):
+    ''' Construct a sequence aligment functor from a file of sequence alignments.
+        See example 3.22 in CTGI.
+    '''
 
     group_labels = []
     indiv = []
@@ -117,7 +58,7 @@ class Environment:
     alignments = []
     check_lengths = []
     for _ in group_labels:
-      group_colors.append([self.Seg.preorder.mask] * len(indiv))
+      group_colors.append([self.Seg.proset.mask] * len(indiv))
       alignments.append(['masked'] * len(indiv))
       check_lengths.append([])
     for name, sequence in zip(names, sequences):
@@ -127,7 +68,7 @@ class Environment:
       group_color = group_colors[i]
       alignment = alignments[i]
       check_length = check_lengths[i]
-      if self.Seg.preorder.geq(x, self.b[j]) or self.b[j] == True:
+      if self.Seg.proset.geq(x, self.b[j]) or self.b[j] == True:
         group_color[j] = x
         alignment[j] = sequence
         n = len(alignment[j])
@@ -152,4 +93,4 @@ class Environment:
     for (x, y), alignment in zip(indexing, alignments):
       if y:
         database[record.index(x)].append(alignment)
-    return SequenceAlignment(self, indiv, base, database)
+    return SequenceAlignment(self.Seg.proset ** self.spec, indiv, base, database)
