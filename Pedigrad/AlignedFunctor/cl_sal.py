@@ -2,23 +2,26 @@ from Pedigrad.SegmentCategory import Proset, SegmentObject, CategoryOfSegments
 
 
 class SequenceAlignment:
-  ''' This structure models the features of a sequence alignment functor.
+  ''' `SeguenceAlignment` models sequence alignment functors.
       The images of the sequence alignment functor are stored in the list `database`
       and can be queried throught the method `eval`.
   '''
 
-  def __init__(self, proset: Proset, indiv: list, base: list, database: list):
+  def __init__(
+    self, proset: Proset, indiv: list,
+    base: list[SegmentObject], database: list[list[list[int]]]
+  ):
     self.indiv = indiv
     self.base = base
     self.database = database
     self.Seg = CategoryOfSegments(proset)
 
   def eval(self, segment: SegmentObject):
-    ''' This method returns the image of the sequence alignment functor for the given segment.
+    ''' Return the image of the sequence alignment functor for the given segment.
     '''
-    for x, y in zip(self.base, self.database):
-      if self.Seg.identity(segment, x):
-        return y
+    for other_segment, image in zip(self.base, self.database):
+      if self.Seg.identity(segment, other_segment):
+        return image
     return []
 
   def extending_category(self, segment: SegmentObject) -> list:

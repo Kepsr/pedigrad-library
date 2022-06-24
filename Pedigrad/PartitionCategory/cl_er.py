@@ -1,118 +1,103 @@
-'''
-This class possesses two objects, namely
-- .classes (list of lists);
-- .range (integer);
-and three methods, namely
-- .__init__ (constructor);
-- .close;
-- .quotient.
-
-The constructor .__init__ takes between 1 and 2 arguments: the first argument should either be an empty list or a list of lists of indices (i.e. non-negative integers) and the second argument, which is optional, should an integer that is greater than or equal to the maximum index contained in the first input.
-
-If the first input is not empty, then it is stored in the object .classes while the object .range receives
-- either the second input, when it is given;
-- or the maximum index contained in the first input when no second input is given.
-
-E.g.
-eq1 = EquivalenceRelation([[0,1,2,9],[7,3,8,6],[4,9,5]])
-eq2 = EquivalenceRelation([[0,1,2,9],[7,3,8,7],[9,15]],18)
-
-If the first input is empty, then the second argument is required. In this case, the object .classes receive the lists containing all the singleton lists containing the integers from 0 to the integer given in the second argument, which is, for its part, stored in the object .range.
-
-E.g.
-eq3 = EquivalenceRelation([],5)
-eq3.classes = [[0], [1], [2], [3], [4], [5]]
-
-
-The method .close replaces the content of the object .classes with the transitive closure of its classes. After this procedure, the object .classes describes an actually equivalence relation (modulo the singleton equivalence classes, which do not need to be specified for obvious reasons).
-
-eq1.close()
-eq1.classes = [[7, 3, 8, 6], [4, 9, 5, 0, 1, 2]]
-eq2.close()
-eq2.classes = [[7, 3, 8], [9, 15, 0, 1, 2]]
-
-The method .quotient() returns a list of integers whose length is equal to the integer stored in the object .range decreased by 1 and whose non-trivial fibers are those contained in the object .classes.
-
-eq1.quotient() = [1, 1, 1, 0, 1, 1, 0, 0, 0, 1]
-eq2.quotient() = [1, 1, 1, 0, 2, 3, 4, 0, 0, 1, 5, 6, 7, 8, 9, 1, 10, 11, 12]
-
-'''
-
 from .jpop import _join_preimages_of_partitions, FAST
 
-class EquivalenceRelation:
-  #The objects of the class are:
-  #. classes (list of lists);
-  #. range (integer);
-  #The following constructor takes between 1 and 2 arguments,
-  #the first one being a list and the second being an integer.
-  def __init__(self, classes: list[list[int]], m: int = -1):
+class Partition:
 
-    # The set of indices on which the classes is defined
-    elements = {j for class_ in classes for j in class_}
-    # The elements should be non-negative integers.
-    # If any is not, raise an exception.
-    assert all(j >= 0 for j in elements), "`classes` should be a list of lists of non-negative integers."
-    #Elements that appear several times are only counted once.
-    #The variable 'individuals' contains the number of distinct elements that
-    #the first input contains.
-    if elements:
-      individuals = max(elements)
-      #If a second input is given, the following lines check that it
-      #is greater then or equal to the maximum index contained in
-      #the first input.
-      if m > -1:
-        assert m >= individuals, "The given range is smaller than the maximum element of the given classes."
-        #If so, we want to assign the value of m to the
-        #object .range. This is done by firs passing it 'individuals'
-        #and self.range (as shown below).
-        individuals = m
-      #The object range contains the cardinal of the set on which the
-      #first input is defined while the object .classes stores the
-      #list of lists given in the first input.
-      self.range = individuals
-      self.classes = classes
+  def __init__(self, equivalence_classes: list[list[int]], m: int = -1):
+    '''
+
+      If `equivalence_classes` is not empty,
+      `self.equivalence_classes` is set to it.
+      `self.card` (the cardinality of the underlying set) will be either
+      - `m` (if it is given, in which case it should be greater than
+        or equal to the maximum index contained in `equivalence_relations`)
+      - or the maximum index contained in the first input when no second input is given.
+
+      e.g.
+      eq1 = EquivalenceRelation([[0,1,2,9],[7,3,8,6],[4,9,5]])
+      eq2 = EquivalenceRelation([[0,1,2,9],[7,3,8,7],[9,15]],18)
+
+      If `equivalence_classes` is empty, then `m` is required.
+      In this case, a simple partition is generated, 
+      in which every index from 0 to `m` gets its own equivalence class.
+
+      e.g.
+      eq3 = EquivalenceRelation([], 5)
+      eq3.classes = [[0], [1], [2], [3], [4], [5]]
+
+    '''
+    if equivalence_classes:
+      # elements is the set underlying equivalence_classes,
+      # and is got by flattening equivalence_classes.
+      elements = {x for class_ in equivalence_classes for x in class_}
+      assert all(x >= 0 for x in elements), "`equivalence_classes` should be a list of lists of non-negative integers."
+      # The variable 'individuals' contains the number of distinct elements that
+      # the first input contains.
+      n = max(elements)
+      if m >= 0:
+        # If m is given,
+        # it must be greater than or equal to the maximum of the underlying set.
+        assert m >= n, "The given range is smaller than the maximum element of the given equivalence_classes."
+        # Assign the value of m to .range.
+        # This is done by firs passing it 'n'
+        # and self.card (as shown below).
+        n = m
+      # self.card is the cardinality of the set underlying self.equivalence_classes
+      self.card = n
+      self.equivalence_classes = equivalence_classes
     else:
-      assert m != -1, "`classes` is trivial: `m` is required."
-      assert m >= 0, "`m` should be a non-negative integer."
-      self.range = m
-      self.classes = [[i] for i in range(m + 1)]
+      assert m >= 0, "`equivalence_classes` is trivial: `m` (a non-negative integer) is required."
+      self.card = m
+      self.equivalence_classes = [[x] for x in range(m)]
 
   def close(self):
     '''
-    Set `self.classes` to the transitive closure of `self`'s classes.
-    After this procedure, `self.classes` describes an actual equivalence relation
-    (modulo the singleton equivalence classes, which do not need to be specifid for obvious reasons).
-    '''
-    self.classes = _join_preimages_of_partitions(self.classes, self.classes, not FAST)
+    Set `self.equivalence_classes` to its transitive closure.
+    So that `self` actually partitions its underlying set.
+    Singleton equivalence classes are not listed.
 
-  def quotient(self):
-    #The quotient cannot be given if the lists contained in the object .classes
-    #do not define an equivalence relation. To prevent an ill-defined quotient,
-    #the classes are turned into an actual equivalence relation by completing
-    #.classes transitively.
+    ```python
+    >>> eq1 = EquivalenceRelation([[0, 1, 2, 9], [7, 3, 8, 6], [4, 9, 5]])
+    >>> eq1.close()
+    >>> eq1.classes
+    [[7, 3, 8, 6], [4, 9, 5, 0, 1, 2]]
+
+    >>> eq2 = EquivalenceRelation([[0, 1, 2, 9], [7, 3, 8, 7], [9, 15]], 18)
+    >>> eq2.close()
+    >>> eq2.classes
+    [[7, 3, 8], [9, 15, 0, 1, 2]]
+    ```
+
+    '''
+    # (x == y && y == z) >= x == z
+    self.equivalence_classes = _join_preimages_of_partitions(self.equivalence_classes, self.equivalence_classes, not FAST)
+
+  def quotient(self) -> list[int]:
+    ''' Return a list of integers of length `self.card`
+        whose non-trivial fibers are those contained in `self.equivalence_classes`.
+
+    eq1.quotient() = [1, 1, 1, 0, 1, 1, 0, 0, 0, 1]
+    eq2.quotient() = [1, 1, 1, 0, 2, 3, 4, 0, 0, 1, 5, 6, 7, 8, 9, 1, 10, 11, 12]
+
+    '''
+    # Ensure that `self.equivalence_classes` actually partitions the underlying set.
     self.close()
-    #Allocates a space in the memory to store the partition associated
-    #with the equivalence relation defined by self.classes.
-    #Allocates spaces in the memory in order to allow the access
-    #to the positions of the elements of the partition without
-    #using the method .append (at the end of the procedure).
-    q = ["?" for _ in range(self.range + 1)]
-    #Now that the partition has the right number of allocated spaces in
-    #the memory, we can fill it by using the positions instead of
-    #appending elements.
-    for i, js in enumerate(self.classes):
+    # q will be the partition associated with the equivalence relation
+    # defined by self.equivalence_classes.
+    # Construct a list of the right size,
+    # whose contents we can reassign in an arbitrary order.
+    q = [None] * self.card
+    for i, js in enumerate(self.equivalence_classes):
       for j in js:
-        #The partition contains the integer i at the position y.
+        # The partition contains i at the index j.
         q[j] = i
-    #The following lines are meant to fill the missing images in.
-    #The indices of these images corresponds to those indices that either
-    #do not appear among the indices of the object .classes or belongs to
-    #singleton classes in the object .classes. The quotient should therefore
-    #give them images that are not shared with other indices.
-    k = len(self.classes)
-    for x in q:
-      if x == "?":
-        x = k
+    # Fill in the missing images.
+    # The indices of these images correspond to those indices 
+    # that either do not appear in self.equivalence_classes
+    # or belong to singletons.
+    # The quotient should therefore give them images that are not shared with other indices.
+    k = len(self.equivalence_classes)
+    for j, i in enumerate(q):
+      if i is None:
+        q[j] = k
         k += 1
     return q

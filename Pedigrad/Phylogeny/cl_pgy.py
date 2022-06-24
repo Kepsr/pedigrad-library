@@ -73,7 +73,7 @@ and returns a list of length len(friendships) whose t-th element is a list of tr
 This means that 'large' is the number of partitions belonging to the first input list for which there is a morphism of partition x.quotient() -> partition
 where we take
 
-x = EquivalenceRelation([hypotheses[t][r]],len(self.phylogeneses)-1)
+x = Partition([hypotheses[t][r]],len(self.phylogeneses)-1)
 
 and 'exact' is the number of partitions that were counted in the large score of r such that if these partitions belong to the large score of any other element s in friendships[t], then either the equality hypotheses[t][r] = hypotheses[t][s] holds or the intersection of hypotheses[t][r] with hypotheses[t][s] is empty.
 The second input of the method .score can, for instance, be taken to be the output of the procedure self.set_up_friendships().
@@ -91,9 +91,9 @@ from .cl_pgs import Phylogenesis
 from Pedigrad.AsciiTree.pet import print_evolutionary_tree
 
 from Pedigrad.utils import nub
-from Pedigrad.PartitionCategory.cl_er import EquivalenceRelation
-from Pedigrad.PartitionCategory.cl_mop import MorphismOfPartitions
-from Pedigrad.PartitionCategory.efp import _epi_factorize_partition
+from Pedigrad.PartitionCategory import (
+  Partition, MorphismOfPartitions, _epi_factorize_partition
+)
 
 class Phylogeny:
   #The objects of the class are:
@@ -315,7 +315,7 @@ class Phylogeny:
           #The variable 'x' contains the obvious partition of the set of taxa
           #whose only non-trivial part is the list of indices
           #representing the hypothetical ancestor 'x'.
-          x = EquivalenceRelation([x], len(self.phylogeneses) - 1)
+          x = Partition([x], len(self.phylogeneses) - 1)
           #The following lines check whether there is a morphism of partitions
           #form 'x' to the partition partition. This condition will
           #later be referred to as the 'large score condition'.

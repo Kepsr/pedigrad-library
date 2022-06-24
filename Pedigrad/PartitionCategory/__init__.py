@@ -4,7 +4,7 @@ from .piop import _preimage_of_partition
 
 from .jpop import _join_preimages_of_partitions, FAST
 
-from .cl_er import EquivalenceRelation
+from .cl_er import Partition
 
 from .cop import coproduct_of_partitions
 
