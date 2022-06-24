@@ -7,7 +7,7 @@ This function takes two lists of the same legnth and returns their coproduct (or
 '''
 from .piop import _preimage_of_partition
 from .jpop import _join_preimages_of_partitions, FAST
-from .cl_er import EquivalenceRelation
+from .cl_er import Partition
 
 def coproduct_of_partitions(partition1,partition2):
   #The following line checks if the coproduct is possible.
@@ -16,7 +16,7 @@ def coproduct_of_partitions(partition1,partition2):
   #Returns the coproduct of two partitions as the quotient of the
   #equivalence relation induced by the join of the preimages
   #of the two partitions.
-  join = EquivalenceRelation(_join_preimages_of_partitions(
+  join = Partition(_join_preimages_of_partitions(
     _preimage_of_partition(partition1),
     _preimage_of_partition(partition2),
     FAST

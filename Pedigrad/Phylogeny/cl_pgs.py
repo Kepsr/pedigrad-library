@@ -25,7 +25,7 @@ The method .print_tree() returns the evolutionary tree describing the sequence o
 
 '''
 
-from Pedigrad.PartitionCategory.cl_er import EquivalenceRelation
+from Pedigrad.PartitionCategory import Partition
 from Pedigrad.AsciiTree.pet import print_evolutionary_tree
 from Pedigrad.utils import is_index
 
@@ -65,7 +65,7 @@ class Phylogenesis:
       #Below, the variable u contains the partitions gathering all the
       #elements of self.history[len(self.history)-1-i] and isolates all the
       #other indices that are not contained in it.
-      u = EquivalenceRelation([x], max_taxon)
+      u = Partition([x], max_taxon)
       #Every partition u is stored in 'partitions'.
       partitions.append(u.quotient())
     #Returns the list of lists describing the evolutionary tree of self.taxon
