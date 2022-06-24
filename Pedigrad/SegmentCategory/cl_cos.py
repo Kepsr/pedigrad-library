@@ -3,12 +3,12 @@
 #------------------------------------------------------------------------------
 '''
 [Objects]
-  .preorder [Type] Proset
+  .proset [Type] Proset
 
 [Methods]
   .__init__
         [Inputs: 1]
-          - preorder [Type] Proset
+          - proset [Type] Proset
         [Outputs: 0]
   .identity
         [Inputs: 2]
@@ -72,8 +72,8 @@ class CategoryOfSegments:
   and encapsulates information related to a category structure.
   '''
 #------------------------------------------------------------------------------
-  def __init__(self, preorder: Proset):
-    self.preorder = preorder
+  def __init__(self, proset: Proset):
+    self.proset = proset
 #------------------------------------------------------------------------------
   @staticmethod
   def identity(segment1: SegmentObject, segment2: SegmentObject):
@@ -102,7 +102,7 @@ class CategoryOfSegments:
       return []
 
     return list(filter(lambda arrow: arrow.defined, [
-        MorphismOfSegments(source, target, i, self.preorder.geq)
+        MorphismOfSegments(source, target, i, self.proset.geq)
         for i in inclusions(0, target.domain, target.domain - source.domain)
     ]))
 #------------------------------------------------------------------------------

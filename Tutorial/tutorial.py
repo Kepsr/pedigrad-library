@@ -39,50 +39,40 @@ for i in range(domain):
   c.append('?' if i % 15 == 11 else (i % 2) + 1)
 
 s = SegmentObject(domain, t, c)
-sys.stdout.write("s = ")
-print(s)
-print(f"colors = {s.colors}")
+print(f"{s = }")
+print(f"{s.colors = }")
 
 s1 = s.merge([(0, 3, 9), (10, 2, 14), (15, 3, 19)], Omega.inf)
-sys.stdout.write("s1 = ")
-print(s1)
-print(f"topology = {s1.topology}")
-print(f"colors = {s1.colors}")
+print(f"{s1 = }")
+print(f"{s1.topology = }")
+print(f"{s1.colors = }")
 
 s2 = s.merge([(0, 3, 9), (10, 2, 14)],Omega.inf)
-sys.stdout.write("s2 = ")
-print(s2)
+print(f"{s2 = }")
 
 s2 = s2.remove([5, 23])
-sys.stdout.write("s2 = ")
-print(s2)
+print(f"{s2 = }")
 
 s2.domain += 4
-sys.stdout.write("s2 = ")
-print(s2)
-print(f"colors = {s2.colors}")
+print(f"{s2 = }")
+print(f"{s2.colors =}")
 
 s3 = s.merge([(0, 3, 9), (10, 2, 14)], Omega.inf)
-sys.stdout.write("s3 = ")
-print(s3)
+print(f"{s3 = }")
 s3 = s3.remove([1, 5, 6, 8, 10])
-sys.stdout.write("s3 = ")
-print(s3)
+print(f"{s3 = }")
 s3.topology = s3.topology + [(24, 24)]
 s3.colors = s3.colors + ['5']
 
-s3.domain = s3.domain+5
-sys.stdout.write("s3 = ")
-print(s3)
-print(f"colors= {s3.colors}")
+s3.domain = s3.domain + 5
+print(f"{s3 = }")
+print(f"{s3.colors = }")
 
 m = MorphismOfSegments(s2, s3, 'id', Omega.geq)
 print(m.defined)
-sys.stdout.write("s = ")
-print(m.source)
-sys.stdout.write("t = ")
-print(m.target)
-print(f"f0 = {m.f0}")
+print(f"{m.source = }")
+print(f"{m.target = }")
+print(f"{m.f0 = }")
 
 print("\n------------------------\n")
 
@@ -98,10 +88,8 @@ t = t.merge([(2, 3, 10), (15, 2, 18)], Omega.inf)
 
 print(Seg.identity(s, t))
 
-sys.stdout.write("s = ")
-print(s)
-sys.stdout.write("t = ")
-print(t)
+print(f"{s = }")
+print(f"{t = }")
 
 h = Seg.homset(s, t)
 for i, item in enumerate(h):
@@ -114,7 +102,7 @@ print("\n------------------------\n")
 E = PointedSet(list('-ACGT'), 0)
 
 Env = Environment(Seg, E, 5, ['4'] * 5) #[] = white nodes
-print(Env.Seg.preorder.relations)
+print(Env.Seg.proset.relations)
 print(Env.pset.symbols)
 print(Env.pset.point())
 print(Env.spec)
@@ -136,7 +124,7 @@ for i, item in enumerate(Seqali.base):
   for x in Seqali.database[i]:
     for y in x:
       print(y)
-    print("")
+    print('')
 
 print("\nImage\n" )
 for i, item in enumerate(Seqali.base):
@@ -146,7 +134,7 @@ for i, item in enumerate(Seqali.base):
   for x in sal:
     for y in x:
       print(y)
-    print("")
+    print('')
 
 print("\nExtending category\n" )
 l = Seqali.extending_category(Seqali.base[0])
@@ -194,4 +182,4 @@ sal = Seqali.eval(Seqali.base[0])
 for x in sal:
   for y in x:
     print(y)
-  print("")
+  print('')

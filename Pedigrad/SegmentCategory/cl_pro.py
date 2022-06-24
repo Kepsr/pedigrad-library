@@ -13,13 +13,12 @@ heading_separators = [
 
 separators = heading_separators + ['!']
 
+
 class Proset:
   '''
-  This class models the features of a pre-ordered set.
-  The pre-order relations are specified through either a file [filename]
-  or another `Proset` item passed to the constructor [__init__].
+  `Proset` models pre-ordered sets.
 
-  A preorder or quasiorder is a reflexive, transitive binary relation.
+  A preorder (or quasiorder) is a reflexive, transitive binary relation.
   Preorders are a general class of relation,
   with specialisations like
   equivalence relations (preorders with symmetry)
@@ -48,6 +47,8 @@ class Proset:
 
   @staticmethod
   def from_file(filename: str):
+    ''' Construct a proset from a specification written in `filename`.
+    '''
     assert filename, "filename cannot be empty"
 
     relations = {}
@@ -117,15 +118,16 @@ class Proset:
     '''
     if not self.transitive:
       for a, ageq in self.relations.items():
-        keep_going = True
-        while keep_going:
-          keep_going = False
+        new_items = True
+        while new_items:
+          new_items = False
           for b in ageq:
             if b == a: continue
             cs = [c for c in self.relations[b] if c not in ageq]
-            keep_going = bool(cs)
+            new_items |= bool(cs)
             ageq.extend(cs)  # XXX Modifying a list while iterating over it
       self.transitive = True
+      assert self.istransitivelyclosed()
 
   def istransitivelyclosed(self):
     # Transitivity: x >= y && y >= z => x >= z
@@ -142,8 +144,6 @@ class Proset:
     ''' Is `x` greater than or equal to `y`?
     '''
     self.close()
-    if isinstance(x, list):
-      x = tuple(x)
     return x in self.relations and y in self.relations[x]
 
   def max(self, x: T, y: T) -> T:
@@ -207,8 +207,5 @@ class ProductofProsets(Proset):
     # will be the product of the sizes of the relations dicts of the prosets.
     # In pseudocode:
     # len(product(d for d in ds)) = product(len(d) for d in ds)
-    elems = tuple(product(*self.prosets))
-    return {
-      xs: [ys for ys in elems if all(p.geq(x, y) for p, x, y in zip(self.prosets, xs, ys))]
-      for xs in elems
-    }
+    domain = tuple(product(*self.prosets))
+    return {xs: [ys for ys in domain if self.geq(xs, ys)] for xs in domain}
