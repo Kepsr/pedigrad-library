@@ -1,113 +1,35 @@
-#------------------------------------------------------------------------------
-#Phylogeny: .phylogeneses, .coalescent, .extend, .make_friends, .score,
-#.choose, .set_up_competition, .compute
-#------------------------------------------------------------------------------
-'''
-This class possesses one object, namely
-- .phylogeneses (Phylogenesis item)
-and ten methods, namely
-- .__init__ (constructor)
-- .coalescent
-- .extend
-- .count_uniformity
-- .boolean_partition
-- .make_friends
-- .set_up_friendships
-- .score
-- .choose_friends
-- .set_up_competition
-- .score_dominance
-- .choose_dominants
-
-
-
-The object .phylogenesis is supposed to contained a list of Phylogenesis items.
-The taxon associated with the i-th phylogenesis should be indexed by the interger i itself and any label appearing in the Phylogenesis items of the list should have its own Phylogenesis item in the list.
-
-
-
-The constructor .__init__ takes a list of lists of lists containing indices and use every internal list of the input to create a Phylogenesis item, which is stored in the object .phylogeneses.
-
-
-
-The method .coalescent() returns the list of the first generations (i.e the last lists) of the objects .history of each of the Phylogenesis item contained in the object .phylogeneses. The k-th list of the output is the first generation of the history of taxon k.
-
-
-
-The method .extend takes a list of pairs of the form (t,l) where t is the label of a taxon and l is a list of taxa and updates the object .phylogeneses as follows:
---> for all pairs (t,l) contained in the input passed to .extend:
-1) if every list l contains the last list of phylogenesis.history and if at least one of the lists l strictly contains the last list of
-phylogenesis.history, then every list l is appended to the list phylogenesis.history and the value True is returned;
-  2) if there is no strict inclusion of the last list of phylogenesis.history into l, then the object .phylogeneses is not modified and the value False is returned;
-  3) otherwise, an error message is returned and the procedure exit the program;
---> in any terminating case, for all other taxa t of the phylogeny that do not appear in the input of .extend, the last list of phylogenesis.history (i.e. the first generation of the history of the phylogenesis of t) is again repeated (i.e. appended again) in the list phylogenesis.history.
-
-
-
-The method .make_friends takes the label of a taxon (i.e. a non-negative integer) and returns a pair of lists (friends,hypothesis). The list 'friends' contains all those taxa that have not coalesced with the input taxon, which means that there are not in the first generation of phylogenesis of the taxon. while the list 'hypothesis' contains the lists obtained by making the union of the first generation of the input taxon with the first generation of one of the taxon in 'friends'.
-
-
-
-The method .set_up_friendships() returns a pair of lists (friendships,hypotheses) containing the lists of the two different outputs of the method .make_friends for every taxon of the phylogeny. More specifically,
-  - 'friendships' is the list of lists whose i-th list contains the first output of the procedure self.make_friends for taxon i;
-  - 'hypotheses'  is the list of lists whose i-th list contains the second output of the procedure self.make_friends for taxon i;
-
-
-
-
-The method .score takes a list of lists of non-negative integers (i.e. partitions) and a pair of lists, say (friendships,hypotheses), where
-  - friendships is a list of lists;
-  - hypotheses is a list of lenght len(friendships) whose t-th element is a
-    list of length len(friendships[t]) whose elements are lists of integers
-    ranging from 0 to len(self.phylogeneses)-1 (preferrably sorted from
-    smallest to greatest);
-and returns a list of length len(friendships) whose t-th element is a list of triples of the form (r,large,exact) where
-  - r runs over the elements of friendships[t],
-  - 'large' is the large score [4] of the hypothetical ancestor
-    hypotheses[t][r] within the set of ancestors contained in
-    hypotheses[t] for the list of partitions given in the input,
-  - 'exact' is the exact score [4] of the hypothetical ancestor
-    hypotheses[t][r] within the set of ancestors contained in
-    hypotheses[t] for the list of partitions given in the input.
-
-This means that 'large' is the number of partitions belonging to the first input list for which there is a morphism of partition x.quotient() -> partition
-where we take
-
-x = Partition([hypotheses[t][r]],len(self.phylogeneses)-1)
-
-and 'exact' is the number of partitions that were counted in the large score of r such that if these partitions belong to the large score of any other element s in friendships[t], then either the equality hypotheses[t][r] = hypotheses[t][s] holds or the intersection of hypotheses[t][r] with hypotheses[t][s] is empty.
-The second input of the method .score can, for instance, be taken to be the output of the procedure self.set_up_friendships().
-
-
-The method .choose takes a list of lists of triples (r,l,e) where l and e are non-negative integers and returns a list of lists whose i-th list is the list of element r of the i-th internal list of the input list for which the associated pairs (l,e) are equal to the greatest local maxima of the function (e,l) -> (l,e) ordered by the lexicographical order and relative to the pairs of the i-th internal list of the input list.
-
-
-The method .set_up_competition takes a list of lists of integers whose length must be equal to the length of self.phylogeneses (i.e. the number of taxa of the phylogeny) and returns a list of lists of integers whose length is also equal to the length of self.phylogeneses and whose t-th internal list is the union of the t-th list of self.coalescent() with the r-th lists of self.coalescent() for every element r in the t-th internal list of the input list.
-
-'''
-
-from .cl_pgs import Phylogenesis
-
-from Pedigrad.AsciiTree.pet import print_evolutionary_tree
-
-from Pedigrad.utils import nub
+from . import Phylogenesis
 from Pedigrad.PartitionCategory import (
   Partition, MorphismOfPartitions, _epi_factorize_partition
 )
+from Pedigrad.utils import nub
+from Pedigrad.AsciiTree import print_evolutionary_tree
 
 class Phylogeny:
-  #The objects of the class are:
-  #.phylogeneses (lists of Phylogenesis items)
-  def __init__(self, phylogeneses: Phylogenesis):
+  '''
+
+      The attribute `phylogeneses` is a list of `Phylogenesis` objects.
+      The taxon of each phylogenesis should be its index in the list
+      and any label appearing in the Phylogenesis items of the list should have its own Phylogenesis item in the list.
+
+  '''
+
+  history = list[list[int]]
+
+  def __init__(self, histories: list[history]):
+    ''' Given a list of histories (each a list of lists of indices),
+        use every history to create a `Phylogenesis`,
+        which is assigned to `phylogeneses`.
+    '''
     #Allocates a space in the memory to store the list of phylogenesis items
     #passed to the procedure. The allocation happens after the format of the
     #has been checked to be valid.
     self.phylogeneses = []
     #The following lines
-    for i, item in enumerate(phylogeneses):
+    for i, history in enumerate(histories):
       #A phylogenesis item is created by using the list of lists
-      #(i.e. the history) contained in item[1].
-      phy = Phylogenesis(item)
+      #(i.e. the history) contained in history[1].
+      phy = Phylogenesis(history)
       #If the i-th phylogenesis contained phylogeneses is not that of taxon
       #i, then the phylogenesis is not valid and the procedure returns an
       #error message before exiting the program. If the taxon of the i-th
@@ -130,6 +52,10 @@ class Phylogeny:
       assert max_taxon < len(self.phylogeneses), "The taxa are not compatible across the phylogeny"
 
   def coalescent(self) -> list:
+    ''' Return the list of the first generations (i.e the last lists) of the objects .history
+        of each of the Phylogenesis item contained in the object .phylogeneses.
+        The k-th list of the output is the first generation of the history of taxon k.
+    '''
     # The coalescent: the first generations of each of the Phylogenesis
     # items contained in self.phylogeneses.
     # Return a list of the first generation of each phylogenesis of self.phylogeneses.
@@ -140,6 +66,16 @@ class Phylogeny:
   #The role of the method .extend is to append the list l to the Phylogenesis
   #item associated with t.
   def extend(self, extension: list):
+    ''' Given a list of pairs of the form (t,l)
+        where t is the label of a taxon and l is a list of taxa,
+        update the object .phylogeneses as follows:
+        --> for all pairs (t,l) contained in the input passed to .extend:
+        1) if every list l contains the last list of phylogenesis.history and if at least one of the lists l strictly contains the last list of
+        phylogenesis.history, then every list l is appended to the list phylogenesis.history and the value True is returned;
+          2) if there is no strict inclusion of the last list of phylogenesis.history into l, then the object .phylogeneses is not modified and the value False is returned;
+          3) otherwise, an error message is returned and the procedure exit the program;
+        --> in any terminating case, for all other taxa t of the phylogeny that do not appear in the input of .extend, the last list of phylogenesis.history (i.e. the first generation of the history of the phylogenesis of t) is again repeated (i.e. appended again) in the list phylogenesis.history.    
+    '''
     #The variable indicates whether if the extension of the phylogeny
     #is 'complete', in the sense that all the lists l in 'extension' have
     #already been added in previous generations, which, in fact,
@@ -201,6 +137,11 @@ class Phylogeny:
     return True
 
   def make_friends(self, taxon: int):
+    ''' Given the index of a taxon, return a pair of lists (friends, hypothesis).
+        The list 'friends' contains all those taxa that have not coalesced with the input taxon,
+        which means that there are not in the first generation of phylogenesis of the taxon.
+        while the list 'hypothesis' contains the lists obtained by making the union of the first generation of the input taxon with the first generation of one of the taxon in 'friends'.
+    '''
     #The friendships are essentially formed at the level of the oldest
     #generation. Friendships will consist of unions of pairs of lists contained
     #in the output of self.coalescent().
@@ -233,6 +174,11 @@ class Phylogeny:
     return (friends, coalescence_hypothesis)
 
   def set_up_friendships(self):
+    ''' Return a pair of lists (friendships, hypotheses) containing the lists of the two different outputs of the method .make_friends for every taxon of the phylogeny. More specifically,
+        - 'friendships' is the list of lists whose i-th list contains the first output of the procedure self.make_friends for taxon i;
+        - 'hypotheses'  is the list of lists whose i-th list contains the second output of the procedure self.make_friends for taxon i;
+
+    '''
     #Allocates two spaces in the memory to store the two types of output
     #given by the procedure self.make_friends for every taxon
     #of self.phylogeneses. Specifically,
@@ -252,6 +198,29 @@ class Phylogeny:
     return (friendships,coalescence_hypotheses)
 
   def score(self, partitions, friendship_network):
+    ''' Given a list of lists of non-negative integers (i.e. partitions) and a pair of lists, say (friendships,hypotheses), where
+          - friendships is a list of lists;
+          - hypotheses is a list of lenght len(friendships) whose t-th element is a
+            list of length len(friendships[t]) whose elements are lists of integers
+            ranging from 0 to len(self.phylogeneses)-1 (preferrably sorted from
+            smallest to greatest);
+        return a list of length len(friendships) whose t-th element is a list of triples of the form (r,large,exact) where
+          - r runs over the elements of friendships[t],
+          - 'large' is the large score [4] of the hypothetical ancestor
+            hypotheses[t][r] within the set of ancestors contained in
+            hypotheses[t] for the list of partitions given in the input,
+          - 'exact' is the exact score [4] of the hypothetical ancestor
+            hypotheses[t][r] within the set of ancestors contained in
+            hypotheses[t] for the list of partitions given in the input.
+
+        This means that 'large' is the number of partitions belonging to the first input list for which there is a morphism of partition x.quotient() -> partition
+        where we take
+
+        x = Partition([hypotheses[t][r]],len(self.phylogeneses)-1)
+
+        and 'exact' is the number of partitions that were counted in the large score of r such that if these partitions belong to the large score of any other element s in friendships[t], then either the equality hypotheses[t][r] = hypotheses[t][s] holds or the intersection of hypotheses[t][r] with hypotheses[t][s] is empty.
+        The second input of the method .score can, for instance, be taken to be the output of the procedure self.set_up_friendships().
+    '''
 
     def homset(partition1: list, partition2: list):
       '''
@@ -403,6 +372,12 @@ class Phylogeny:
     return score_cardinality_adjusted
 
   def choose(self, scores):
+    ''' Given a list of lists of triples (r,l,e)
+        where l and e are non-negative integers,
+        return a list of lists whose i-th list is the list of element r of the i-th internal list of the input list
+        for which the associated pairs (l,e) are equal to the greatest local maxima of the function (e,l) -> (l,e)
+        ordered by the lexicographical order and relative to the pairs of the i-th internal list of the input list.
+    '''
 
     def lex_order(pair1: tuple, pair2: tuple):
       ''' A non-strict lexicographical order on pairs of integers.
@@ -461,7 +436,13 @@ class Phylogeny:
     #returned.
     return result
 
-  def set_up_competition(self, best_fit):
+  def set_up_competition(self, best_fit: list[list[int]]):
+    ''' Given a list of lists of integers
+        whose length must be equal to the length of self.phylogeneses (i.e. the number of taxa of the phylogeny),
+        return a list of lists of integers whose length is also equal to the length of self.phylogeneses
+        and whose t-th internal list is the union of the t-th list of self.coalescent()
+        with the r-th lists of self.coalescent() for every element r in the t-th internal list of the input list.
+    '''
     #The competition takes place in the oldest generation.
     #competitors will consist of unions of pairs of lists contained
     #in the output of self.coalescent().
@@ -474,15 +455,27 @@ class Phylogeny:
     for x, y in zip(coalescent, best_fit):
         #The following ensures that if y is empty, then the first
         #generation of the phylogenesis of t is given.
-        common_ancestor = nub(x)
-        #The following loop add the first generations of the friend of the
-        #taxon t to the 'common ancestors.
-        for r in y:
-          common_ancestor = nub(common_ancestor + coalescent[r])
+        # Add the first generations of the friend of the
+        # taxon t to the 'common ancestors.
+        common_ancestor = set.intersection(set(x), *(set(coalescent[r]) for r in y))
         #The list 'common_ancestor' to only give one representative to the
         #union it represents.
-        common_ancestor.sort()
-        coalescence_hypothesis.append(common_ancestor)
+        coalescence_hypothesis.append(sorted(common_ancestor))
     #The list of competitors is returned, where each competitor is indexed
     #by the integer of the taxon it is supposed to represent.
     return coalescence_hypothesis
+
+  def count_uniformity():
+    raise NotImplementedError()
+
+  def boolean_partition():
+    raise NotImplementedError()
+
+  def choose_friends():
+    raise NotImplementedError()
+
+  def score_dominance():
+    raise NotImplementedError()
+
+  def choose_dominants():
+    raise NotImplementedError()
