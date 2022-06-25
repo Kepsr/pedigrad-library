@@ -92,7 +92,7 @@ print(f"{s = }")
 print(f"{t = }")
 
 h = Seg.homset(s, t)
-for i, item in h:
+for i, item in enumerate(h):
   print(f"{i}) well-defined = {item.defined}")
   print(f"f1 = {item.f1}")
   print(f"f0 = {item.f0}")
