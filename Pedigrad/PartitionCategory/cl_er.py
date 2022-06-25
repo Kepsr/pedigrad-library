@@ -1,4 +1,4 @@
-from .jpop import _join_preimages_of_partitions, FAST
+from . import _join_preimages_of_partitions, FAST
 
 class Partition:
 

@@ -69,7 +69,7 @@ def _join_preimages_of_partitions(
 def __test():
   p1 = [[0, 3], [1, 4], [2]]
   p2 = [[0, 1], [2], [3], [4]]
-  x = _join_preimages_of_partitions(p1,p2,FAST)
+  x = _join_preimages_of_partitions(p1, p2, FAST)
   assert (x == [[1, 4, 0, 3], [2]]), x
 
 __test()
