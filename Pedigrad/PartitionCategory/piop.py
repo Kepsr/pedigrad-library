@@ -1,5 +1,6 @@
 from Pedigrad.utils import nub
 
+
 def _preimage_of_partition(partition: list) -> list[list]:
   '''
   Given a list, return a list of lists of indices that index the same element.

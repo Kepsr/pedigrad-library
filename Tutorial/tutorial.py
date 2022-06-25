@@ -169,8 +169,6 @@ table.write("dprog.fa", mode = 'w', debug = False, display = True)
 
 print("\n------------------------\n")
 
-E = PointedSet(list('-ACGT'), 0)
-
 Env = Environment(Seg, E, 2, ['1'] * 2) #[] = white nodes
 Seqali = Env.seqali("dprog.fa")
 

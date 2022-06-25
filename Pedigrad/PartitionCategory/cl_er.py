@@ -5,63 +5,47 @@ class Partition:
   def __init__(self, equivalence_classes: list[list[int]], m: int = -1):
     '''
 
-      If `equivalence_classes` is not empty,
-      `self.equivalence_classes` is set to it.
-      `self.card` (the cardinality of the underlying set) will be either
-      - `m` (if it is given, in which case it should be greater than
-        or equal to the maximum index contained in `equivalence_relations`)
-      - or the maximum index contained in the first input when no second input is given.
-
-      e.g.
-      eq1 = EquivalenceRelation([[0,1,2,9],[7,3,8,6],[4,9,5]])
-      eq2 = EquivalenceRelation([[0,1,2,9],[7,3,8,7],[9,15]],18)
-
-      If `equivalence_classes` is empty, then `m` is required.
-      In this case, a simple partition is generated, 
-      in which every index from 0 to `m` gets its own equivalence class.
-
-      e.g.
-      eq3 = EquivalenceRelation([], 5)
-      eq3.classes = [[0], [1], [2], [3], [4], [5]]
+      `self.equivalence_classes` is set to `equivalence_classes`.
+      The underlying set will be `range(n)` where `n` is either
+      - the greatest index in `equivalence_relations`
+      - or `m` (if `m != -1`),
+        which should be greater than or equal to
+        the greatest index in `equivalence_relations`
 
     '''
-    if equivalence_classes:
-      # elements is the set underlying equivalence_classes,
-      # and is got by flattening equivalence_classes.
-      elements = {x for class_ in equivalence_classes for x in class_}
-      assert all(x >= 0 for x in elements), "`equivalence_classes` should be a list of lists of non-negative integers."
-      # The variable 'individuals' contains the number of distinct elements that
-      # the first input contains.
+    # elements is the set underlying equivalence_classes,
+    # and is got by flattening it.
+    elements = {x for class_ in equivalence_classes for x in class_}
+    assert all(x >= 0 for x in elements), "`equivalence_classes` should be a list of lists of non-negative integers."
+    if elements:
       n = max(elements)
       if m >= 0:
         # If m is given,
-        # it must be greater than or equal to the maximum of the underlying set.
+        # it must be greater than or equal to the size of the underlying set.
         assert m >= n, "The given range is smaller than the maximum element of the given equivalence_classes."
-        # Assign the value of m to .range.
-        # This is done by firs passing it 'n'
-        # and self.card (as shown below).
         n = m
-      # self.card is the cardinality of the set underlying self.equivalence_classes
-      self.card = n
-      self.equivalence_classes = equivalence_classes
-    else:
-      assert m >= 0, "`equivalence_classes` is trivial: `m` (a non-negative integer) is required."
-      self.card = m
-      self.equivalence_classes = [[x] for x in range(m)]
+      equivalence_classes.extend([[i] for i in range(n) if i not in elements])
+    self.equivalence_classes = equivalence_classes
+
+  @staticmethod
+  def from_int(m: int):
+    ''' Create a simple partition,
+        in which every index from 0 to `m` gets its own equivalence class.
+    '''
+    return Partition([[x] for x in range(m)])
 
   def close(self):
     '''
     Set `self.equivalence_classes` to its transitive closure.
     So that `self` actually partitions its underlying set.
-    Singleton equivalence classes are not listed.
 
     ```python
-    >>> eq1 = EquivalenceRelation([[0, 1, 2, 9], [7, 3, 8, 6], [4, 9, 5]])
+    >>> eq1 = Partition([[0, 1, 2, 9], [7, 3, 8, 6], [4, 9, 5]])
     >>> eq1.close()
     >>> eq1.classes
     [[7, 3, 8, 6], [4, 9, 5, 0, 1, 2]]
 
-    >>> eq2 = EquivalenceRelation([[0, 1, 2, 9], [7, 3, 8, 7], [9, 15]], 18)
+    >>> eq2 = Partition([[0, 1, 2, 9], [7, 3, 8, 7], [9, 15]], 18)
     >>> eq2.close()
     >>> eq2.classes
     [[7, 3, 8], [9, 15, 0, 1, 2]]
@@ -69,15 +53,13 @@ class Partition:
 
     '''
     # (x == y && y == z) >= x == z
-    self.equivalence_classes = _join_preimages_of_partitions(self.equivalence_classes, self.equivalence_classes, not FAST)
+    self.equivalence_classes = _join_preimages_of_partitions(
+      self.equivalence_classes, self.equivalence_classes, not FAST
+    )
 
   def quotient(self) -> list[int]:
-    ''' Return a list of integers of length `self.card`
+    ''' Return a list of integers
         whose non-trivial fibers are those contained in `self.equivalence_classes`.
-
-    eq1.quotient() = [1, 1, 1, 0, 1, 1, 0, 0, 0, 1]
-    eq2.quotient() = [1, 1, 1, 0, 2, 3, 4, 0, 0, 1, 5, 6, 7, 8, 9, 1, 10, 11, 12]
-
     '''
     # Ensure that `self.equivalence_classes` actually partitions the underlying set.
     self.close()
@@ -85,7 +67,7 @@ class Partition:
     # defined by self.equivalence_classes.
     # Construct a list of the right size,
     # whose contents we can reassign in an arbitrary order.
-    q = [None] * self.card
+    q = [None for class_ in self.equivalence_classes for x in class_]
     for i, js in enumerate(self.equivalence_classes):
       for j in js:
         # The partition contains i at the index j.
@@ -101,3 +83,21 @@ class Partition:
         q[j] = k
         k += 1
     return q
+
+
+def __test():
+    eq1 = Partition([[0, 1, 2, 9], [7, 3, 8, 6], [4, 9, 5]])
+    eq1.close()
+    assert eq1.equivalence_classes == [[7, 3, 8, 6], [4, 9, 5, 0, 1, 2]]
+    assert eq1.quotient() == [1, 1, 1, 0, 1, 1, 0, 0, 0, 1]
+
+    eq2 = Partition([[0, 1, 2, 9], [7, 3, 8, 7], [9, 15]], 18)
+    eq2.close()
+    assert eq2.equivalence_classes == [[7, 3, 8], [9, 15, 0, 1, 2], [4], [5], [6], [10], [11], [12], [13], [14], [16], [17]]
+    assert eq2.quotient() == [1, 1, 1, 0, 2, 3, 4, 0, 0, 1, 5, 6, 7, 8, 9, 1, 10, 11]
+
+    eq3 = Partition.from_int(5)
+    assert eq3.equivalence_classes == [[0], [1], [2], [3], [4]]
+
+
+__test()
