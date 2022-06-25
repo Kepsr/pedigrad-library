@@ -22,8 +22,6 @@ The output of print_atf(atf,atpf[1]) is given below.
 A   C   D...E   F   B
 '''
 
-import sys
-
 def print_atf(atf: list, depth: int):
   #If depth = 0 then the program terminates and the tree is printed 
   #on the standard output.
@@ -31,30 +29,28 @@ def print_atf(atf: list, depth: int):
     return
 
   for x in atf:
-    sys.stdout.write("|   ")
+    print("|   ")
     for _ in range(x[0][0] - 1):
-      sys.stdout.write("    ")
-  sys.stdout.write("\n")
-  sys.stdout.flush()
+      print("    ")
+  print("\n")
   for x in atf:
     #Prints branches for intermediate levels.
     if depth != 1:
-      sys.stdout.write("|")
+      print("|")
     #Prints the label of the leaves.
     else:
       for k, ktem in enumerate(x[1]):
         if k > 0:
-          sys.stdout.write("...")
-        sys.stdout.write(chr(65 + ktem))
+          print("...")
+        print(chr(65 + ktem))
     for _ in range(x[0][1]):
-      sys.stdout.write("____")
+      print("____")
     #Prints spaces between the branches of intermediate levels.
     if depth != 1:
       for _ in range(x[0][0] - x[0][1] - 1):
-        sys.stdout.write("    ")
-    sys.stdout.write("   ")
-  sys.stdout.write("\n")
-  sys.stdout.flush()
+        print("    ")
+    print("   ")
+  print("\n")
   #Truncates the atf from below so that 
   #the next level of the atf is turned into a forest.
   next_atf = sum((x[1] for x in atf), [])
