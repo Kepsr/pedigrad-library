@@ -7,8 +7,8 @@ def _join_preimages_of_partitions(
   speed_mode: bool
 ):
   '''
-  Takes a pair of lists of disjoint sets of indices in some range.
-  and returns the list of the maximal unions of internal lists
+  Given a pair of lists of disjoint sets of indices in some range,
+  return the list of the maximal unions of internal lists
   that intersect within the concatenation of the two input lists (see below).
   The `bool` `speed_mode` should indicate whether one of the input lists
   may contain two different sublists with the same element.
@@ -21,14 +21,14 @@ def _join_preimages_of_partitions(
   ```python
   p1 = [[0, 3], [1, 4], [2]]
   p2 = [[0, 1], [2], [3], [4]]
+  ```
   we can notice that
   [0,3] intersects with [0,1] and [3]
-  [0,1] intersects with [1,4] and [1]
-  [1,4] intersects with [4]
-  and
-  [2] only intersects with [2]
+  [0,1] intersects with [1,4] and [0,3]
+  [1,4] intersects with [0,1] and [4]
+  [2] intersects with [2]
   so that we have
-  _join_preimages_of_partitions(p1,p2,FAST) = [[1, 4, 0, 3], [2]]
+  _join_preimages_of_partitions(p1, p2, FAST) = [[1, 4, 0, 3], [2]]
   ```
 
   In terms of implementation, the algorithm considers each internal list
