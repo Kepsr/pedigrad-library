@@ -1,5 +1,5 @@
 from .efp import _epi_factorize_partition
-from .piop import _preimage_of_partition
+from .piop import partition_from_list
 from .jpop import _join_preimages_of_partitions, FAST
 from .cl_er import Partition
 from .cop import coproduct_of_partitions
