@@ -2,9 +2,9 @@ from Pedigrad.utils import nub
 
 FAST = True
 
-def _join_preimages_of_partitions(
-  preimage1: list[list[int]], preimage2: list[list[int]],
-  speed_mode: bool
+def join_partitions(
+  equivalence_classes1: list[list[int]], equivalence_classes2: list[list[int]],
+  speed_mode: bool = not FAST
 ):
   '''
   Given a pair of lists of disjoint sets of indices in some range,
@@ -28,7 +28,7 @@ def _join_preimages_of_partitions(
   [1,4] intersects with [0,1] and [4]
   [2] intersects with [2]
   so that we have
-  _join_preimages_of_partitions(p1, p2, FAST) = [[1, 4, 0, 3], [2]]
+  join_partitions(p1, p2, FAST) = [[1, 4, 0, 3], [2]]
   ```
 
   In terms of implementation, the algorithm considers each internal list
@@ -38,44 +38,36 @@ def _join_preimages_of_partitions(
   (the list is removed).
   The function continues until all the possible intersections have been checked.
   '''
-  # Make copies so as not to modify preimage1, preimage2.
-  # In addition, repetitions that may occur in each internal list of the
-  # two inputs are eliminated:
-  tmp1 = [nub(xs) for xs in preimage1]
-  tmp2 = [nub(xs) for xs in preimage2]
+  # Make copies so as not to modify the inputs
+  # and eliminate repeats in each equivalence class:
+  tmp1 = [nub(xs) for xs in equivalence_classes1]
+  tmp2 = [nub(xs) for xs in equivalence_classes2]
   for xs1 in tmp1:
+    # Get the union of xs1 with every equivalence class in tmp2 that intersects it
     for x1 in xs1:
       for i, xs2 in enumerate(tmp2):
-        for x2 in xs2:
-          if x1 == x2:
-            xs1.extend(xs2)
-            tmp2.pop(i)
-            # Eliminate repeats from the union of xs1 and xs2.
-            xs1 = nub(xs1)
+        if any(x1 == x2 for x2 in xs2):
+          xs1 = nub(xs1 + xs2)  # The union of xs1 and xs2
+          tmp2.pop(i)
+          if speed_mode == FAST:
+            # Assume x1 occurs nowhere else in tmp2
+            # assert x1 not in (x for xs in tmp2 for x in xs)
             break
-        else:
-          continue
-        # x1 no longer needs to be sought in preimage2.
-        if speed_mode == FAST:
-          break
-    # Append to tmp2 the union of the first internal list of preimage1
-    # with all the other internal lists of preimage2 that intersect it
+    # Append the union to tmp2
     tmp2.append(xs1)
-  # Return the non-empty lists of preimage2
-  # return [x for x in tmp2 if x]
   return tmp2
 
 
 def __test():
   p1 = [[0, 3], [1, 4], [2]]
   p2 = [[0, 1], [2], [3], [4]]
-  x = _join_preimages_of_partitions(p1, p2, FAST)
+  x = join_partitions(p1, p2, FAST)
   assert (x == [[1, 4, 0, 3], [2]]), x
 
 __test()
 
 
-# Long description of what _join_preimages_of_partitions(p1, p2, FAST) does
+# Long description of what join_partitions(p1, p2, FAST) does
 # for p1 = [[0, 3], [1, 4], [2]]; p2 = [[0, 1], [2], [3], [4]]
 
 # The element 0 of [0,3] is sought in the list [0,1] of p2;

@@ -1,4 +1,4 @@
-from . import _join_preimages_of_partitions, FAST
+from . import join_partitions, FAST
 
 class Partition:
 
@@ -53,9 +53,14 @@ class Partition:
 
     '''
     # (x == y && y == z) >= x == z
-    self.equivalence_classes = _join_preimages_of_partitions(
+    self.equivalence_classes = join_partitions(
       self.equivalence_classes, self.equivalence_classes, not FAST
     )
+    assert all(
+      i1 == i2 or not set(xs1) & set(xs2)
+      for i1, xs1 in enumerate(self.equivalence_classes)
+      for i2, xs2 in enumerate(self.equivalence_classes)
+    ), self.equivalence_classes
 
   def quotient(self) -> list[int]:
     ''' Return a list of integers
@@ -90,11 +95,13 @@ def __test():
     eq1.close()
     assert eq1.equivalence_classes == [[7, 3, 8, 6], [4, 9, 5, 0, 1, 2]]
     assert eq1.quotient() == [1, 1, 1, 0, 1, 1, 0, 0, 0, 1]
+    assert all(i in eq1.equivalence_classes[j] for i, j in enumerate(eq1.quotient()))
 
     eq2 = Partition([[0, 1, 2, 9], [7, 3, 8, 7], [9, 15]], 18)
     eq2.close()
     assert eq2.equivalence_classes == [[7, 3, 8], [9, 15, 0, 1, 2], [4], [5], [6], [10], [11], [12], [13], [14], [16], [17]]
     assert eq2.quotient() == [1, 1, 1, 0, 2, 3, 4, 0, 0, 1, 5, 6, 7, 8, 9, 1, 10, 11]
+    assert all(i in eq2.equivalence_classes[j] for i, j in enumerate(eq2.quotient()))
 
     eq3 = Partition.from_int(5)
     assert eq3.equivalence_classes == [[0], [1], [2], [3], [4]]
