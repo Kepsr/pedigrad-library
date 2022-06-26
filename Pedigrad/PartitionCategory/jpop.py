@@ -13,7 +13,7 @@ def _join_preimages_of_partitions(
   The `bool` `speed_mode` should indicate whether one of the input lists
   may contain two different sublists with the same element.
 
-  In practice, the two input lists would be obtained as outputs of `_preimage_of_partition(xs, ys)`
+  In practice, the two input lists would be obtained as outputs of `partition_from_list`
   for two input lists of the same length.
 
   e.g.
