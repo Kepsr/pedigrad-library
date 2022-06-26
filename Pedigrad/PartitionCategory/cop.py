@@ -1,4 +1,4 @@
-from . import Partition, partition_from_list, _join_preimages_of_partitions, FAST
+from . import Partition, partition_from_list, join_partitions, FAST
 
 
 def coproduct_of_partitions(partition1: list, partition2: list):
@@ -10,7 +10,7 @@ def coproduct_of_partitions(partition1: list, partition2: list):
 
   # Return the coproduct of two partitions as the quotient of the
   # equivalence relation induced by the join of two partitions' preimages.
-  join = Partition(_join_preimages_of_partitions(
+  join = Partition(join_partitions(
     partition_from_list(partition1),
     partition_from_list(partition2),
     FAST
