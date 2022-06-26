@@ -1,5 +1,6 @@
 from . import join_partitions, FAST
 
+
 class Partition:
 
   def __init__(self, equivalence_classes: list[list[int]], m: int = -1):
@@ -72,22 +73,35 @@ class Partition:
     # defined by self.equivalence_classes.
     # Construct a list of the right size,
     # whose contents we can reassign in an arbitrary order.
-    q = [None for class_ in self.equivalence_classes for x in class_]
+    q = [None] * sum(len(js) for js in self.equivalence_classes)
     for i, js in enumerate(self.equivalence_classes):
       for j in js:
         # The partition contains i at the index j.
         q[j] = i
-    # Fill in the missing images.
-    # The indices of these images correspond to those indices 
-    # that either do not appear in self.equivalence_classes
-    # or belong to singletons.
-    # The quotient should therefore give them images that are not shared with other indices.
-    k = len(self.equivalence_classes)
-    for j, i in enumerate(q):
-      if i is None:
-        q[j] = k
-        k += 1
     return q
+
+
+def __quotient_impl1(jss):
+  q = [None] * sum(len(js) for js in jss)
+  for i, js in enumerate(jss):
+    for j in js:
+      q[j] = i
+  return q
+
+
+def __quotient_impl2(jss):
+  # This implementation returns the same as quotient_impl1, but is a bit slower.
+  # The dict to list conversion seems to be a performance bottleneck,
+  # probably because of the sort.
+  q = {j: i for i, js in enumerate(jss) for j in js}
+  return [q[j] for j in sorted(q)]
+
+
+def __quotient_impl3(jss):
+  # Returns a dict rather than a list
+  # Faster than implementation 1 for "sparse" quotients (many small equivalence classes)
+  # Slower for "dense" quotients (few large equivalence classes)
+  return {j: i for i, js in enumerate(jss) for j in js}
 
 
 def __test():
