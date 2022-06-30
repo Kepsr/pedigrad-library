@@ -7,7 +7,7 @@ def join_partitions(
   speed_mode: bool = not FAST
 ):
   '''
-  Given a pair of lists of disjoint sets of indices in some range,
+  Given two lists, each containing disjoint sets of indices in some range,
   return the list of the maximal unions of internal lists
   that intersect within the concatenation of the two input lists (see below).
   The `bool` `speed_mode` should indicate whether one of the input lists
@@ -18,7 +18,7 @@ def join_partitions(
 
   e.g.
   Considering the following lists of lists of indices
-  ```python
+  ```
   p1 = [[0, 3], [1, 4], [2]]
   p2 = [[0, 1], [2], [3], [4]]
   ```

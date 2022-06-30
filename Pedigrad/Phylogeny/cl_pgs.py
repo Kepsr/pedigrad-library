@@ -1,6 +1,5 @@
 from Pedigrad.PartitionCategory import Partition
 from Pedigrad.AsciiTree.pet import print_evolutionary_tree
-from Pedigrad.utils import is_index
 
 
 class Phylogenesis:
@@ -32,7 +31,7 @@ class Phylogenesis:
     #If this is not the case, an error message is returned by the procedure.
     for i in range(len(history) - 1):
       for j in history[i]:
-        assert j in history[i + 1] and is_index(j), "history is not valid"
+        assert j in history[i + 1] and j >= 0, "history is not valid"
     self.history: list[list[int]] = history
 
   def partitions(self):

@@ -77,14 +77,6 @@ def fasta(filename):
 #    return a_list[0:an_index]+a_list[an_index+1:len(a_list)]
 #------------------------------------------------------------------------------
 
-def is_index(x):
-  ''' Is `x` a non-negative integer?
-  '''
-  try:
-    return int(x) == x and x >= 0
-  except:
-    return False
-
 def nub(xs: list) -> list:
   ''' Take a list and return a new list lacking repeats
       but otherwise retaining the order of elements.
