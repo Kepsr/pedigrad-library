@@ -40,7 +40,7 @@ class Partition:
         So that it actually partitions the set underlying `self`.
     '''
     # (x == y && y == z) >= x == z
-    self.equivalence_classes = join_trans(self.equivalence_classes)
+    self.equivalence_classes = join_trans(*self.equivalence_classes)
     assert all(
       i1 == i2 or not set(xs1) & set(xs2)
       for i1, xs1 in enumerate(self.equivalence_classes)

@@ -34,10 +34,10 @@ def coproduct_of_partitions(xs: list, ys: list) -> list[int]:
   assert len(xs) == len(ys), "Lengths must match"
   # Return the coproduct of two partitions as the quotient of the
   # equivalence relation induced by the join of two partitions' preimages.
-  join = Partition(join_trans([
+  join = Partition(join_trans(
     *partition_from_list(xs),
     *partition_from_list(ys),
-  ]))
+  ))
   return join.quotient()
 
 
