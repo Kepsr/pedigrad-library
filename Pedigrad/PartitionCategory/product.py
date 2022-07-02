@@ -55,7 +55,7 @@ def __product_impl2(xs: list, ys: list) -> list[int]:
       classes.append([(x1, y1)])
   return idxs
 
-
+# FIXME
 def __coproduct_impl2(xs: list, ys: list) -> list[int]:
   classes = []
   idxs = []
