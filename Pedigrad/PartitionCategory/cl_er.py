@@ -53,19 +53,14 @@ class Partition:
     '''
     # Ensure that `self.equivalence_classes` actually partitions the underlying set.
     self.close()
-    # q will be the partition associated with the equivalence relation
+    # Return the partition associated with the equivalence relation
     # defined by self.equivalence_classes.
-    # Construct a list of the right size,
-    # whose contents we can reassign in an arbitrary order.
-    q = [None] * sum(len(js) for js in self.equivalence_classes)
-    for i, js in enumerate(self.equivalence_classes):
-      for j in js:
-        # The partition contains i at the index j.
-        q[j] = i
-    return q
+    return _quotient_impl1(self.equivalence_classes)
 
 
-def __quotient_impl1(jss):
+def _quotient_impl1(jss):
+  # Construct a list of the right size,
+  # and reassign its contents in an arbitrary order.
   q = [None] * sum(len(js) for js in jss)
   for i, js in enumerate(jss):
     for j in js:
@@ -73,7 +68,7 @@ def __quotient_impl1(jss):
   return q
 
 
-def __quotient_impl2(jss):
+def _quotient_impl2(jss):
   # This implementation returns the same as quotient_impl1, but is a bit slower.
   # The dict to list conversion seems to be a performance bottleneck,
   # probably because of the sort.
@@ -81,7 +76,7 @@ def __quotient_impl2(jss):
   return [q[j] for j in sorted(q)]
 
 
-def __quotient_impl3(jss):
+def _quotient_impl3(jss):
   # Returns a dict rather than a list
   # Faster than implementation 1 for "sparse" quotients (many small equivalence classes)
   # Slower for "dense" quotients (few large equivalence classes)
