@@ -65,7 +65,7 @@ def all_that_overlap_trans(A, S):
 
 
 # Equivalent to (earlier implementation of) join_partitions(S, S)
-def join_trans(S: list[list]) -> list[list]:
+def join_trans(*S: list[list]) -> list[list]:
   ''' Join the lists in `S` transitively.
   '''
   # return nub(tuple(nub(sum(sorted(all_that_overlap_trans(A, S)), []))) for A in S)
@@ -81,9 +81,9 @@ def __test():
   p1 = [[0, 3], [1, 4], [2]]    # e.g. partition_from_list('abcab')
   p2 = [[0, 1], [2], [3], [4]]  # e.g. partition_from_list('aabcd')
   assert join_partitions(p1, p2) == [[1, 4, 0, 3], [2]]
-  assert join_trans([*p1, *p2]) == [[0, 1, 3, 4], [2]]
+  assert join_trans(*p1, *p2) == [[0, 1, 3, 4], [2]]
   S = [[1, 2], [3, 4], [5, 6], [4, 5], [2, 3]]
-  assert (x := sorted(map(sorted, join_trans(S)))) == [[1, 2, 3, 4, 5, 6]], x
+  assert (x := sorted(map(sorted, join_trans(*S)))) == [[1, 2, 3, 4, 5, 6]], x
   # assert (x := sorted(map(sorted, join_partitions(S, S)))) == [[1, 2, 3, 4, 5, 6]], x
   assert (x := all_that_overlap_trans([1, 2], S)) == [[1, 2], [2, 3], [3, 4], [4, 5], [5, 6]], x
   assert (x := sorted([A for A in S if overlap_trans(A, [1], S)])) == [[1, 2], [2, 3], [3, 4], [4, 5], [5, 6]], x
