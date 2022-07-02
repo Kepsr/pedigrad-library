@@ -1,4 +1,4 @@
-from . import join_partitions, FAST
+from Pedigrad.PartitionCategory.jpop import join_trans
 
 
 class Partition:
@@ -28,35 +28,19 @@ class Partition:
       equivalence_classes.extend([[i] for i in range(n) if i not in elements])
     self.equivalence_classes = equivalence_classes
 
-  @staticmethod
-  def from_int(m: int):
+  @classmethod
+  def from_int(cls, m: int):
     ''' Create a simple partition,
         in which every index from 0 to `m` gets its own equivalence class.
     '''
-    return Partition([[x] for x in range(m)])
+    return cls([[x] for x in range(m)])
 
   def close(self):
-    '''
-    Set `self.equivalence_classes` to its transitive closure.
-    So that `self` actually partitions its underlying set.
-
-    ```python
-    >>> eq1 = Partition([[0, 1, 2, 9], [7, 3, 8, 6], [4, 9, 5]])
-    >>> eq1.close()
-    >>> eq1.classes
-    [[7, 3, 8, 6], [4, 9, 5, 0, 1, 2]]
-
-    >>> eq2 = Partition([[0, 1, 2, 9], [7, 3, 8, 7], [9, 15]], 18)
-    >>> eq2.close()
-    >>> eq2.classes
-    [[7, 3, 8], [9, 15, 0, 1, 2]]
-    ```
-
+    ''' Set `self.equivalence_classes` to its transitive closure.
+        So that it actually partitions the set underlying `self`.
     '''
     # (x == y && y == z) >= x == z
-    self.equivalence_classes = join_partitions(
-      self.equivalence_classes, self.equivalence_classes, not FAST
-    )
+    self.equivalence_classes = join_trans(self.equivalence_classes)
     assert all(
       i1 == i2 or not set(xs1) & set(xs2)
       for i1, xs1 in enumerate(self.equivalence_classes)
@@ -105,16 +89,19 @@ def __quotient_impl3(jss):
 
 
 def __test():
+    from .efp import _epi_factorize_partition
+    norm = lambda xs: sorted(map(sorted, xs))
+
     eq1 = Partition([[0, 1, 2, 9], [7, 3, 8, 6], [4, 9, 5]])
     eq1.close()
-    assert eq1.equivalence_classes == [[7, 3, 8, 6], [4, 9, 5, 0, 1, 2]]
-    assert eq1.quotient() == [1, 1, 1, 0, 1, 1, 0, 0, 0, 1]
+    assert norm(eq1.equivalence_classes) == [[0, 1, 2, 4, 5, 9], [3, 6, 7, 8]]
+    assert _epi_factorize_partition(eq1.quotient()) == [0, 0, 0, 1, 0, 0, 1, 1, 1, 0]
     assert all(i in eq1.equivalence_classes[j] for i, j in enumerate(eq1.quotient()))
 
     eq2 = Partition([[0, 1, 2, 9], [7, 3, 8, 7], [9, 15]], 18)
     eq2.close()
-    assert eq2.equivalence_classes == [[7, 3, 8], [9, 15, 0, 1, 2], [4], [5], [6], [10], [11], [12], [13], [14], [16], [17]]
-    assert eq2.quotient() == [1, 1, 1, 0, 2, 3, 4, 0, 0, 1, 5, 6, 7, 8, 9, 1, 10, 11]
+    assert norm(eq2.equivalence_classes) == [[0, 1, 2, 9, 15], [3, 7, 8], [4], [5], [6], [10], [11], [12], [13], [14], [16], [17]]
+    assert _epi_factorize_partition(eq2.quotient()) == [0, 0, 0, 1, 2, 3, 4, 1, 1, 0, 5, 6, 7, 8, 9, 0, 10, 11]
     assert all(i in eq2.equivalence_classes[j] for i, j in enumerate(eq2.quotient()))
 
     eq3 = Partition.from_int(5)

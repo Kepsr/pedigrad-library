@@ -10,9 +10,8 @@ def join_partitions(
   Given two lists, each containing disjoint sets of indices in some range,
   return the list of the maximal unions of internal lists
   that intersect within the concatenation of the two input lists (see below).
-  The `bool` `speed_mode` should indicate whether one of the input lists
-  may contain two different sublists with the same element.
-
+  The `speed_mode` should indicate whether either input list
+  can contain overlapping classes.
   '''
   assert {x for xs in equivalence_classes1 for x in xs} == {x for xs in equivalence_classes2 for x in xs}
   # Make copies so as not to modify the inputs
@@ -69,7 +68,7 @@ def all_that_overlap_trans(A, S):
   return sum((all_that_overlap_trans(B, neg) for B in pos), pos)
 
 
-# Result should be the same as join_partitions(S, S)
+# Equivalent to join_partitions(S, S)
 def join_trans(S: list[list]) -> list[list]:
   ''' Join the lists in `S` transitively.
   '''
