@@ -29,14 +29,14 @@ def coproduct_of_partitions(xs: list, ys: list) -> list[int]:
       (x1, y1) == (x2, y2) iff x1 == x2 or y1 == y2
       ```
   '''
-  from .listops import partition_from_list, _quotient_impl1
+  from .listops import quotient_from_list, list_from_quotient
   from .jpop import join_trans
   assert len(xs) == len(ys), "Lengths must match"
   # Return the coproduct of two partitions as the quotient of the
   # equivalence relation induced by the join of two partitions' preimages.
-  return _quotient_impl1(join_trans(
-    *partition_from_list(xs),
-    *partition_from_list(ys),
+  return list_from_quotient(join_trans(
+    *quotient_from_list(xs),
+    *quotient_from_list(ys),
   ))
 
 

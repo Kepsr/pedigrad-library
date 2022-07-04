@@ -213,7 +213,7 @@ class Phylogeny:
             hypotheses[t][r] within the set of ancestors contained in
             hypotheses[t] for the list of partitions given in the input.
 
-        This means that 'large' is the number of partitions belonging to the first input list for which there is a morphism of partition x.quotient() -> partition
+        This means that 'large' is the number of partitions belonging to the first input list for which there is a morphism of partition x.indices() -> partition
         where we take
 
         x = Partition([hypotheses[t][r]],len(self.phylogeneses)-1)
@@ -289,7 +289,7 @@ class Phylogeny:
           #form 'x' to the partition partition. This condition will
           #later be referred to as the 'large score condition'.
           #i.e. x --> P(partition)
-          if homset(x.quotient(), partition):
+          if homset(x.indices(), partition):
             #If the condition is satisfied, then the hypothetical ancestor
             #x is stored in 'score_coalescence[r]' and
             #its label is stored in 'score_labeling[r]'.

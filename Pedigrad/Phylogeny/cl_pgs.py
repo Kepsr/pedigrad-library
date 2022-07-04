@@ -48,7 +48,7 @@ class Phylogenesis:
     # elements of a generation and isolates all the
     # other indices that are not contained in it.
     # Returns the list of lists describing the evolutionary tree of self.taxon
-    return [Partition([x], max_taxon).quotient() for x in reversed(self.history)]
+    return [Partition([x], max_taxon).indices() for x in reversed(self.history)]
 
   def print_tree(self):
     ''' Return the evolutionary tree described by the sequence of partitions returned by `self.partition()`.
