@@ -30,7 +30,7 @@ class Partition:
 
   @classmethod
   def from_int(cls, m: int):
-    ''' Create a simple partition,
+    ''' Create a simple partition using a canonical surjection,
         in which every index from 0 to `m` gets its own equivalence class.
     '''
     return cls([[x] for x in range(m)])
@@ -51,36 +51,12 @@ class Partition:
     ''' Return a list of integers
         whose non-trivial fibers are those contained in `self.equivalence_classes`.
     '''
+    from .listops import _quotient_impl1
     # Ensure that `self.equivalence_classes` actually partitions the underlying set.
     self.close()
     # Return the partition associated with the equivalence relation
     # defined by self.equivalence_classes.
     return _quotient_impl1(self.equivalence_classes)
-
-
-def _quotient_impl1(jss):
-  # Construct a list of the right size,
-  # and reassign its contents in an arbitrary order.
-  q = [None] * sum(len(js) for js in jss)
-  for i, js in enumerate(jss):
-    for j in js:
-      q[j] = i
-  return q
-
-
-def _quotient_impl2(jss):
-  # This implementation returns the same as quotient_impl1, but is a bit slower.
-  # The dict to list conversion seems to be a performance bottleneck,
-  # probably because of the sort.
-  q = {j: i for i, js in enumerate(jss) for j in js}
-  return [q[j] for j in sorted(q)]
-
-
-def _quotient_impl3(jss):
-  # Returns a dict rather than a list
-  # Faster than implementation 1 for "sparse" quotients (many small equivalence classes)
-  # Slower for "dense" quotients (few large equivalence classes)
-  return {j: i for i, js in enumerate(jss) for j in js}
 
 
 def __test():
