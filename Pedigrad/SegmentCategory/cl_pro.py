@@ -18,7 +18,8 @@ class Proset:
   '''
   `Proset` models pre-ordered sets.
 
-  A preorder (or quasiorder) is a reflexive, transitive binary relation.
+  A pre-ordered set is a set with a reflexive, transitive binary relation
+  (a preorder).
   Preorders are a general class of relation,
   with specialisations like
   equivalence relations (preorders with symmetry)
@@ -57,7 +58,7 @@ class Proset:
 
       # Seek the tokens '!obj:' or 'obj:'
       while True:
-        heading = read_until(file, heading_separators, [':'])
+        heading = read_until(file, heading_separators, [':'])[:-1]
         if not heading:
           raise Exception(f"\'obj:\' was not found in {filename}")
         if heading[-1] == "!obj":
@@ -69,7 +70,7 @@ class Proset:
       # Seek the token 'rel:'
       found_rel = False
       while not found_rel:
-        tokens = read_until(file, separators, ['#', ':'], inclusive=True)
+        tokens = read_until(file, separators, ['#', ':'])
         if tokens == ['']:
           break
         if tokens[-2:] == ["rel", ":"]:
@@ -90,7 +91,7 @@ class Proset:
       while True:
 
         while True:
-          tokens = read_until(file, separators, ['#', '>'], inclusive=True)
+          tokens = read_until(file, separators, ['#', '>'])
           successors = []
           if tokens == ['']:
             break
@@ -100,7 +101,7 @@ class Proset:
           read_until(file, separators, ['\n'])
 
         # Complete relations with predecessors for each successor
-        predecessors = read_until(file, separators, [';'])
+        predecessors = read_until(file, separators, [';'])[:-1]
         for successor in set(successors):
           try:
             for predecessor in predecessors:
@@ -179,7 +180,7 @@ class Proset:
     return len(self.relations)
 
   def __pow__(self, n: int):
-    ''' The Cartesian product of this proset with itself n times.
+    ''' The Cartesian product of this proset with itself `n` times.
     '''
     return ProductofProsets(*(self,) * n)
 
