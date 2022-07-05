@@ -1,6 +1,6 @@
 from . import Phylogenesis
 from Pedigrad.PartitionCategory import (
-  Partition, MorphismOfPartitions, _epi_factorize_partition
+  Partition, MorphismOfPartitions, to_indices
 )
 from Pedigrad.utils import nub
 from Pedigrad.AsciiTree import print_evolutionary_tree
@@ -264,7 +264,7 @@ class Phylogeny:
     #The following loop gives labels to the different lists (i.e. the
     #hypothetical ancestors) in hypotheses in order to recognize them up
     #to list equality.
-    labeling = [_epi_factorize_partition(hypothesis) for hypothesis in hypotheses]
+    labeling = [to_indices(hypothesis) for hypothesis in hypotheses]
     #The following loop fills the coefficients of 'score_matrix' in.
     for partition in partitions:
       #The variable score_row will contain the rows of the matrix.

@@ -1,11 +1,13 @@
 ''' Products and coproducts in the category of partitions
 '''
-from .efp import _epi_factorize_partition
+from .listops import parts_from_list, list_from_parts, to_indices
+from .jpop import join_trans
 
 
 def product_of_partitions(xs: list, ys: list) -> list[int]:
   ''' Given two lists of the same length,
-      return a canonical factorization of their zip.
+      interpret them as partitions, compute their product (meet),
+      and recast to a list of indices.
 
       ```
       (x1, y1) == (x2, y2) iff x1 == x2 and y1 == y2
@@ -17,26 +19,24 @@ def product_of_partitions(xs: list, ys: list) -> list[int]:
 
   '''
   assert len(xs) == len(ys), "Lengths must match"
-  return _epi_factorize_partition(list(zip(xs, ys)))
+  return to_indices(list(zip(xs, ys)))
 
 
 def coproduct_of_partitions(xs: list, ys: list) -> list[int]:
   ''' Given two lists of the same length,
-      return their coproduct (or join) as partitions,
-      specifically the quotient of the join of their preimages.
+      interpret them as partitions, compute their coproduct (join),
+      and recast to a list of indices.
 
       ```
       (x1, y1) == (x2, y2) iff x1 == x2 or y1 == y2
       ```
   '''
-  from .listops import quotient_from_list, list_from_quotient
-  from .jpop import join_trans
   assert len(xs) == len(ys), "Lengths must match"
-  # Return the coproduct of two partitions as the quotient of the
-  # equivalence relation induced by the join of two partitions' preimages.
-  return list_from_quotient(join_trans(
-    *quotient_from_list(xs),
-    *quotient_from_list(ys),
+  # Return a list of indices
+  # mapping each element of the coproduct (join) of two partitions to its part.
+  return list_from_parts(join_trans(
+    *parts_from_list(xs),
+    *parts_from_list(ys),
   ))
 
 
