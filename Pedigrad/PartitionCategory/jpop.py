@@ -2,21 +2,21 @@ from Pedigrad.utils import nub
 
 
 def join_partitions(
-  equivalence_classes1: list[list[int]],
-  equivalence_classes2: list[list[int]],
+  parts1: list[list[int]],
+  parts2: list[list[int]],
 ) -> list[list[int]]:
   '''
-  Given two lists, each containing disjoint sets of indices in some range,
+  Given two lists, each of disjoint sets of indices in some range,
   return the list of the maximal unions of internal lists
   that intersect within the concatenation of the two input lists (see below).
   '''
-  assert {x for xs in equivalence_classes1 for x in xs} == {x for xs in equivalence_classes2 for x in xs}
+  assert {x for xs in parts1 for x in xs} == {x for xs in parts2 for x in xs}
   # Make copies so as not to modify the inputs
-  # and eliminate repeats in each equivalence class:
-  tmp1 = [nub(xs) for xs in equivalence_classes1]
-  tmp2 = [nub(xs) for xs in equivalence_classes2]
+  # and eliminate repeats in each part:
+  tmp1 = [nub(xs) for xs in parts1]
+  tmp2 = [nub(xs) for xs in parts2]
   for xs1 in tmp1:
-    # Get the union of xs1 with every equivalence class in tmp2 that intersects it
+    # Get the union of xs1 with every part in tmp2 that intersects it
     for x1 in xs1:
       for i, xs2 in enumerate(tmp2):
         if any(x1 == x2 for x2 in xs2):
@@ -53,25 +53,25 @@ def check(f):
 
 
 @check
-def all_that_overlap_trans(A, S):
-  ''' Return the lists in `S` that intersect `A`,
+def all_that_overlap_trans(A: list, parts: list[list]) -> list[list]:
+  ''' Return the lists in `parts` that intersect `A`,
       whether directly or through a chain of other lists.
   '''
   pos, neg = [], []
-  for B in S:
+  for B in parts:
     # if B != A:
       (pos if overlap(A, B) else neg).append(B)
   return sum((all_that_overlap_trans(B, neg) for B in pos), pos)
 
 
 # Equivalent to (earlier implementation of) join_partitions(S, S)
-def join_trans(*S: list[list]) -> list[list]:
-  ''' Join the lists in `S` transitively.
+def join_trans(*parts: list[list]) -> list[list]:
+  ''' Join `parts` transitively.
   '''
   # return nub(tuple(nub(sum(sorted(all_that_overlap_trans(A, S)), []))) for A in S)
   J = []
-  for A in S:
-    x = nub(sum(sorted(all_that_overlap_trans(A, S)), []))
+  for part in parts:
+    x = nub(sum(sorted(all_that_overlap_trans(part, parts)), []))
     if x not in J:
       J.append(x)
   return J

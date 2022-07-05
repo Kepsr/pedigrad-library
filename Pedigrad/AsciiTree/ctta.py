@@ -59,12 +59,13 @@ We then repeat the previous procedure with, this time, the fiber of the morphism
 the_atpf = [(5, [(4, [(1, [0]), (1, [2]), (2, [3, 4])]), (1, [(1, [5])])]), (1, [(1, [(1, [1])])])]
 
 '''
-from Pedigrad.PartitionCategory import quotient_from_list
+from Pedigrad.PartitionCategory import parts_from_list
+
 
 def convert_tree_to_atpf(tree):
   #The highest level in the atpf grammar (i.e. the leaves) is computed
   #by computing the preimage of the last source given in the input list.
-  the_atpf = [(len(x), x) for x in quotient_from_list(tree[-1].source)]
+  the_atpf = [(len(x), x) for x in parts_from_list(tree[-1].source)]
   #To compute of the next levels of the atpf grammar (i.e. the trees)
   #one needs to compute the fibers of the morphisms contained in 
   #the input list (i.e tree).
@@ -72,7 +73,7 @@ def convert_tree_to_atpf(tree):
     # Replaces the fibers with the backeting induced by the atpf.
     # The bracketing of the fiber is preserved, so that the level of the 
     # bracketing contained in the atpf is increased.
-    fiber = [the_atpf[g] for g in quotient_from_list(tree[-1-i].arrow)]
+    fiber = [the_atpf[g] for g in parts_from_list(tree[-1-i].arrow)]
     #Computes the weight of each tree.
     for i, x in enumerate(fiber):
       weight = sum(t[0] for t in x)

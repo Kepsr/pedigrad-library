@@ -1,4 +1,4 @@
-from . import _epi_factorize_partition
+from .listops import to_indices
 from Pedigrad.utils import nub
 
 
@@ -6,7 +6,7 @@ class MorphismOfPartitions:
   '''
       The canonical epimorphisms associated with the partitions of the first and second input lists are stored in the objects .source and .target, respectively.
 
-      If we suppose that the two input lists are labeled in the same way as the procedure _epi_factorize_partition would (re)label them,
+      If we suppose that the two input lists are labeled in the same way as the procedure to_indices would (re)label them,
       then the list that is to be contained in the object .arrow is computed as the image of the product of the two lists,
       as illustrated in the following example.
 
@@ -39,10 +39,10 @@ class MorphismOfPartitions:
         If no such morphism exists, an exception is raised.
     '''
     assert len(source) == len(target)
-    # Relabeling the source and target with _epi_factorize_partition
+    # Relabeling the source and target with to_indices
     # makes it possible to quickly determine whether there is an arrow between the two.
-    self.source = _epi_factorize_partition(source)
-    self.target = _epi_factorize_partition(target)
+    self.source = to_indices(source)
+    self.target = to_indices(target)
     self.arrow = []
     # Compute the binary relation that is supposed to encode the function
     # from the codomain of the epimorphism encoding the source partition
