@@ -43,13 +43,13 @@ class Environment:
 
     group_labels = []
     indiv = []
-    names, sequences = fasta(filename)
-    for name in names:
-      x, y, *_ = name
-      if x not in group_labels:
-        group_labels.append(x)
-      if y not in indiv:
-        indiv.append(y)
+    names_and_sequences = fasta(filename)
+    for name, sequence in names_and_sequences:
+      g, i, _ = name.split(':')
+      if g not in group_labels:
+        group_labels.append(g)
+      if i not in indiv:
+        indiv.append(i)
 
     assert len(indiv) <= len(self.b), f"{filename} contains more individuals than the number specified in the environment."
     assert len(indiv) >= len(self.b), f"{filename} contains fewer individuals than the number specified in the environment."
@@ -61,8 +61,8 @@ class Environment:
       group_colors.append([self.Seg.proset.mask] * len(indiv))
       alignments.append(['masked'] * len(indiv))
       check_lengths.append([])
-    for name, sequence in zip(names, sequences):
-      gl, ind, x = name
+    for name, sequence in names_and_sequences:
+      gl, ind, x = name.split(':')
       i = group_labels.index(gl)
       j = indiv.index(ind)
       group_color = group_colors[i]
