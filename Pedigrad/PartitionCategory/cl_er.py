@@ -29,10 +29,15 @@ class Partition:
 
   @classmethod
   def finest(cls, m: int):
-    ''' Construct the finest partition of `m`.
-        Each element gets its own part.
+    ''' Construct the finest partition of a set of cardinality `m`.
     '''
     return cls([[x] for x in range(m)])
+
+  @classmethod
+  def coarsest(cls, m: int):
+    ''' Construct the coarsest partition of a set of cardinality `m`.
+    '''
+    return cls([list(range(m))])
 
   def close(self):
     ''' Set `self.parts` to its transitive closure.
