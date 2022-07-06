@@ -68,7 +68,7 @@ s3.domain = s3.domain + 5
 print(f"{s3 = }")
 print(f"{s3.colors = }")
 
-m = MorphismOfSegments(s2, s3, 'id', Omega.geq)
+m = MorphismOfSegments(s2, s3, list(range(s2.domain)), Omega.geq)
 print(m.defined)
 print(f"{m.source = }")
 print(f"{m.target = }")
