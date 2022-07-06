@@ -196,7 +196,7 @@ class ProductofProsets(Proset):
     self.prosets = prosets
 
   def geq(self, xs, ys):
-    return all(p.geq(x, y) for p, x, y in zip(self.prosets, xs, ys))
+    return all(y or p.geq(x, y) for p, x, y in zip(self.prosets, xs, ys))
 
   def inf(self, xs, ys):
     return tuple(p.inf(x, y) for p, x, y in zip(self.prosets, xs, ys))
