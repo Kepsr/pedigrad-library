@@ -113,8 +113,9 @@ class SegmentObject:
       i += 1
 
     #How to display segments with a long masked end patch
-    yield '|'
     n = self.domain - self.topology[-1][1] - 1
+    if n > 0:
+      yield '|'
     yield f'o-{n - 2}-o' if n > 11 else 'o' * n
 
     self.parse = saved_parse
