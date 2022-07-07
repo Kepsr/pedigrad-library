@@ -7,6 +7,11 @@ from Pedigrad import (
   Sequence, Table
 )
 
+def print_with_margin(x: str):
+  print()
+  print(x)
+  print()
+
 
 Omega = Proset.from_file("omega.yml")
 print(Omega.relations)
@@ -29,14 +34,14 @@ print('3' in Omega)
 print('1' in Omega)
 print('?' in Omega)
 
-print("\n------------------------\n")
+print_with_margin('-' * 24)
 
 domain = 20
 t = []
 c = []
 for i in range(domain):
   t.append((i, i))
-  c.append('?' if i % 15 == 11 else (i % 2) + 1)
+  c.append('?' if i % 15 == 11 else str((i % 2) + 1))
 
 s = SegmentObject(domain, t, c)
 print(f"{s = }")
@@ -47,7 +52,7 @@ print(f"{s1 = }")
 print(f"{s1.topology = }")
 print(f"{s1.colors = }")
 
-s2 = s.merge([(0, 3, 9), (10, 2, 14)],Omega.inf)
+s2 = s.merge([(0, 3, 9), (10, 2, 14)], Omega.inf)
 print(f"{s2 = }")
 
 s2 = s2.remove([5, 23])
@@ -55,16 +60,16 @@ print(f"{s2 = }")
 
 s2.domain += 4
 print(f"{s2 = }")
-print(f"{s2.colors =}")
+print(f"{s2.colors = }")
 
 s3 = s.merge([(0, 3, 9), (10, 2, 14)], Omega.inf)
 print(f"{s3 = }")
 s3 = s3.remove([1, 5, 6, 8, 10])
 print(f"{s3 = }")
-s3.topology = s3.topology + [(24, 24)]
-s3.colors = s3.colors + ['5']
+s3.topology.append((24, 24))
+s3.colors.append(5)
 
-s3.domain = s3.domain + 5
+s3.domain += 5
 print(f"{s3 = }")
 print(f"{s3.colors = }")
 
@@ -74,7 +79,7 @@ print(f"{m.source = }")
 print(f"{m.target = }")
 print(f"{m.f0 = }")
 
-print("\n------------------------\n")
+print_with_margin('-' * 24)
 
 Seg = CategoryOfSegments(Omega)
 
@@ -97,7 +102,7 @@ for i, item in enumerate(h):
   print(f"f1 = {item.f1}")
   print(f"f0 = {item.f0}")
 
-print("\n------------------------\n")
+print_with_margin('-' * 24)
 
 E = PointedSet(list('-ACGT'), 0)
 
@@ -111,22 +116,23 @@ print(Env.b)
 s4 = Env.segment(list('ACGTTPCA-CT'), '1')
 print(s4)
 
-print("\n------------------------\n")
+print_with_margin('-' * 24)
 
 Seqali = Env.seqali("align.fa")
 
-print("\nDatabase\n" )
+print_with_margin("Database")
 
 print(Seqali.indiv)
-for i, item in enumerate(Seqali.base):
-  print(f"{i}) color: {item.colors[item.parse]}")
-  print(item)
-  for x in Seqali.database[i]:
-    for y in x:
-      print(y)
-    print('')
+for i, (x, y) in enumerate(zip(Seqali.base, Seqali.database)):
+  print(f"{i}) color: {x.colors[x.parse]}")
+  print(x)
+  for x in y:
+    for xx in x:
+      print(xx)
+    print()
 
-print("\nImage\n" )
+print_with_margin("Image")
+
 for i, item in enumerate(Seqali.base):
   print(f"base[{i}]")
   print(item)
@@ -134,23 +140,25 @@ for i, item in enumerate(Seqali.base):
   for x in sal:
     for y in x:
       print(y)
-    print('')
+    print()
 
-print("\nExtending category\n" )
+print_with_margin("Extending category")
+
 l = Seqali.extending_category(Seqali.base[0])
 for i, m in l:
   print(i)
   print(m.f1)
   print(m.f0)
 
-print("\nExtending category\n" )
+print_with_margin("Extending category")
+
 l = Seqali.extending_category(Seqali.base[1])
 for i, m in l:
   print(i)
   print(m.f1)
   print(m.f0)
 
-print("\n------------------------\n")
+print_with_margin('-' * 24)
 
 a = list('AGCTAGCTGA')
 b = list('GTGGATCGATGA')
@@ -159,20 +167,22 @@ A = Sequence('a', a, '1')
 B = Sequence('b', b, '1')
 
 table = Table(A, B)
-print("\nincidence")
+print()
+print("incidence")
 table.incidence()
 table.stdout()
-print("\nfillout")
+print()
+print("fillout")
 table.fillout()
 table.stdout()
 table.write("dprog.fa", mode = 'w', debug = False, display = True)
 
-print("\n------------------------\n")
+print_with_margin('-' * 24)
 
-Env = Environment(Seg, E, 2, ['1'] * 2) #[] = white nodes
+Env = Environment(Seg, E, 2, [1] * 2) #[] = white nodes
 Seqali = Env.seqali("dprog.fa")
 
-print("\nImage\n" )
+print_with_margin("Image")
 
 print(Seqali.indiv)
 print(Seqali.base[0])
@@ -180,4 +190,4 @@ sal = Seqali.eval(Seqali.base[0])
 for x in sal:
   for y in x:
     print(y)
-  print('')
+  print()
