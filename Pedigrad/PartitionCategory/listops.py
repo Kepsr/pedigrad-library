@@ -1,25 +1,25 @@
 ''' Lists to encode partitions
 
-    The subscript operator of a list `xs` (i.e. its `__getitem__` method)
-    maps indices in the domain `range(len(xs))` to elements of the list.
-    The equivalence kernel of the subscript operator (
-    ```
-    i == j iff xs[i] == xs[j]
-    ```
-    ) partitions the domain.
+The subscript operator of a list `xs` (i.e. its `__getitem__` method)
+maps indices in the domain `range(len(xs))` to elements of the list.
+The equivalence kernel of the subscript operator (
+```
+i == j iff xs[i] == xs[j]
+```
+) partitions the domain.
 
-    It is sensible to treat the list as not just the image of the subscript operator,
-    but also its codomain, in which case the function is a surjection.
+It is sensible to treat the list as not just the image of the subscript operator,
+but also its codomain, in which case the function is a surjection.
 
-    An epimorphism is a right-cancellative morphism.
-    i.e. f: a -> b such that for all objects c and all morphisms g1, g2: b -> c
-    g1 . f = g2 . f => g1 = g2
+An epimorphism is a right-cancellative morphism.
+i.e. f: a -> b such that for all objects c and all morphisms g1, g2: b -> c
+g1 . f = g2 . f => g1 = g2
 
-    Epimorphisms are categorical analogues of surjective functions.
-    In the category of sets, where morphisms are functions,
-    epimorphisms are just surjective functions.
+Epimorphisms are categorical analogues of surjective functions.
+In the category of sets, where morphisms are functions,
+epimorphisms are just surjective functions.
 
-    [0, 1, 0, 1] <-> [[0, 1], [2, 3]]
+[0, 1, 0, 1] <-> [[0, 1], [2, 3]]
 
 '''
 from Pedigrad.utils import nub

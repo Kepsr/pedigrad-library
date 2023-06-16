@@ -55,16 +55,13 @@ class CategoryOfSegments:
     return SegmentObject(
       domain,
       topology=[(i, i) for i in range(domain)],
-      colors=[color] * domain
+      colors=[color for i in range(domain)]
     )
 
   def homset(self, source: SegmentObject, target: SegmentObject) -> list[MorphismOfSegments]:
     ''' Return the hom-set of a pair of segments.
     '''
-    if target.domain < source.domain:
-      return []
-
-    return [arrow for arrow in [
+    return [] if target.domain < source.domain else [arrow for arrow in [
         MorphismOfSegments(source, target, f1, self.proset.geq)
         for f1 in inclusions(0, target.domain, target.domain - source.domain)
         # Each list f1 is treated as a mapping from `int` to `int` (i -> f1[i])

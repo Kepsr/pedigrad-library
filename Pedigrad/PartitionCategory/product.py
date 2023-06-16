@@ -9,16 +9,12 @@ def product_of_partitions(xs: list, ys: list) -> list[int]:
       interpret them as partitions, compute their product (meet),
       and recast to a list of indices.
 
+      According to the equivalence relation:
       ```
       (x1, y1) == (x2, y2) iff x1 == x2 and y1 == y2
       ```
-  ```
-  product_of_partitions('111123', 'abcccc')
-  >>> [0, 1, 2, 2, 3, 4]
-  ```
-
   '''
-  assert len(xs) == len(ys), "Lengths must match"
+  assert len(xs) == len(ys), "The lengths of `xs` and `ys` must match"
   return to_indices(list(zip(xs, ys)))
 
 
@@ -27,13 +23,14 @@ def coproduct_of_partitions(xs: list, ys: list) -> list[int]:
       interpret them as partitions, compute their coproduct (join),
       and recast to a list of indices.
 
+      According to the equivalence relation:
       ```
       (x1, y1) == (x2, y2) iff x1 == x2 or y1 == y2
       ```
   '''
-  assert len(xs) == len(ys), "Lengths must match"
-  # Return a list of indices
-  # mapping each element of the coproduct (join) of two partitions to its part.
+  assert len(xs) == len(ys), "The lengths of `xs` and `ys` must match"
+  # The i-th element indicates which part of the coproduct (join)
+  # contains the i-th item.
   return list_from_parts(join_trans(
     *parts_from_list(xs),
     *parts_from_list(ys),
